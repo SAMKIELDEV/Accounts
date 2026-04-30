@@ -6,10 +6,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: 'sm' | 'md';
   isLoading?: boolean;
   fullWidth?: boolean;
+  asChild?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, fullWidth, disabled, children, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, fullWidth, asChild, disabled, children, ...props }, ref) => {
+    const Component = asChild ? React.Fragment : 'button';
+    
     const variants = {
       primary: 'bg-[#E8FF47] text-black hover:bg-[#d4eb3f] active:scale-[0.98]',
       ghost: 'bg-transparent border border-[#1F1F1F] text-white hover:border-[#888888] active:scale-[0.98]',
@@ -21,17 +24,26 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       md: 'px-6 py-3 text-base',
     };
 
+    const classes = cn(
+      'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E8FF47] focus:ring-offset-2 focus:ring-offset-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed',
+      variants[variant],
+      sizes[size],
+      fullWidth && 'w-full',
+      className
+    );
+
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+        className: cn(classes, children.props.className),
+        ...props,
+      });
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={cn(
-          'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E8FF47] focus:ring-offset-2 focus:ring-offset-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed',
-          variants[variant],
-          sizes[size],
-          fullWidth && 'w-full',
-          className
-        )}
+        className={classes}
         {...props}
       >
         {isLoading ? (
