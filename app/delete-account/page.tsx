@@ -33,12 +33,14 @@ export default function DeleteAccountPage() {
       if (response.ok) {
         await logout();
         router.push('https://samkiel.tech?deleted=true');
+      } else if (response.status === 401) {
+        toast.error('Your session has expired. Please sign in again.');
       } else {
         const data = await response.json();
-        toast.error(data.message || 'Failed to delete account. Check your password.');
+        toast.error(data.message || 'We could not delete your account at this time. Please try again.');
       }
     } catch (error) {
-      toast.error('An error occurred during account deletion.');
+      toast.error('An error occurred. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

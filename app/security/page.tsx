@@ -42,10 +42,12 @@ export default function SecurityPage() {
         console.log('Password update successful');
         toast.success('Password updated successfully.');
         setPasswords({ current: '', new: '', confirm: '' });
+      } else if (response.status === 401) {
+        toast.error('Your session has expired. Please sign in again.');
       } else {
         const data = await response.json();
         console.error('Password update failed:', data);
-        toast.error(data.message || 'Failed to update password.');
+        toast.error(data.message || 'Could not update password. Please check your current password.');
       }
     } catch (error) {
       console.error('Process error:', error);

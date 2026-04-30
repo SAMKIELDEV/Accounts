@@ -34,10 +34,12 @@ export default function PersonalInfoPage() {
         console.log('Email update request successful');
         toast.success('Verification email sent to your new address.');
         setNewEmail('');
+      } else if (response.status === 401) {
+        toast.error('Your session has expired. Please sign in again.');
       } else {
         const data = await response.json();
         console.error('Email update failed:', data);
-        toast.error(data.message || 'Failed to update email.');
+        toast.error(data.message || 'We could not update your email right now. Please try again.');
       }
     } catch (error) {
       console.error('Process error:', error);
