@@ -7,16 +7,22 @@ import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
+type VerifyStatus = 'loading' | 'success' | 'error' | 'needs-verification' | 'invalid';
+
 function VerifyEmailContent() {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const email = searchParams.get('email');
+  
+  const [status, setStatus] = useState<VerifyStatus>(() => {
+    if (token) return 'loading';
+    if (email) return 'needs-verification';
+    return 'invalid';
+  });
+  const [isResending, setIsResending] = useState(false);
 
   const verifyEmail = useCallback(async () => {
-    if (!token) {
-      setStatus('error');
-      return;
-    }
+    if (!token) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/verify-email`, {
@@ -31,17 +37,38 @@ function VerifyEmailContent() {
         setStatus('error');
       }
     } catch (error) {
-      console.error('Verification error:', error);
       setStatus('error');
     }
   }, [token]);
 
   useEffect(() => {
-    verifyEmail();
-  }, [verifyEmail]);
+    if (token) {
+      verifyEmail();
+    }
+  }, [token, verifyEmail]);
 
   const handleResend = async () => {
-    toast.info('Please sign in to resend the verification link.');
+    if (!email) return;
+    
+    setIsResending(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        toast.success('Verification email sent. Check your inbox.');
+      } else {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.message || 'Failed to resend verification email.');
+      }
+    } catch (error) {
+      toast.error('An error occurred while resending the verification email.');
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -78,6 +105,33 @@ function VerifyEmailContent() {
             </div>
           )}
 
+          {status === 'needs-verification' && (
+            <div className="space-y-6">
+              <div className="w-16 h-16 bg-[#E8FF47]/10 border border-[#E8FF47]/20 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-[#E8FF47]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white mb-2">Please verify your email.</h2>
+                <p className="text-[#888888]">
+                  We sent a verification link to <span className="text-white font-medium">{email}</span>. Check your inbox to continue.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Button fullWidth onClick={handleResend} isLoading={isResending}>
+                  Resend Verification Email
+                </Button>
+                <Link 
+                  href="/login" 
+                  className="block text-sm text-[#888888] hover:text-white"
+                >
+                  Back to login
+                </Link>
+              </div>
+            </div>
+          )}
+
           {status === 'error' && (
             <div className="space-y-6">
               <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto">
@@ -90,8 +144,8 @@ function VerifyEmailContent() {
                 <p className="text-[#888888]">The link may have expired or is invalid.</p>
               </div>
               <div className="space-y-3">
-                <Button fullWidth onClick={handleResend} variant="ghost">
-                  Resend Verification
+                <Button fullWidth onClick={handleResend} isLoading={isResending} variant="ghost">
+                  Resend Verification Email
                 </Button>
                 <Link 
                   href="/login" 
@@ -100,6 +154,23 @@ function VerifyEmailContent() {
                   Back to login
                 </Link>
               </div>
+            </div>
+          )}
+
+          {status === 'invalid' && (
+            <div className="space-y-6">
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white mb-2">Invalid link.</h2>
+                <p className="text-[#888888]">The verification link is missing or malformed.</p>
+              </div>
+              <Button fullWidth asChild variant="ghost">
+                <Link href="/login">Back to Sign In</Link>
+              </Button>
             </div>
           )}
         </Card>

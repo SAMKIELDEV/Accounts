@@ -32,6 +32,12 @@ export default function LoginPage() {
       router.push('/');
     } catch (error: any) {
       const errorMessage = error.message || '';
+      
+      if (errorMessage.includes('EMAIL_NOT_VERIFIED')) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       if (errorMessage.includes('401')) {
         toast.error('Invalid email or password. Please try again.');
       } else {

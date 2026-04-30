@@ -81,14 +81,16 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-[#1F1F1F] text-center">
-            <Link 
-              href="/login" 
-              className="text-[#888888] hover:text-white text-sm transition-colors"
-            >
-              Back to login
-            </Link>
-          </div>
+          {!submitted && (
+            <div className="mt-8 pt-6 border-t border-[#1F1F1F] text-center">
+              <Link 
+                href="/login" 
+                className="text-[#888888] hover:text-white text-sm transition-colors"
+              >
+                Back to login
+              </Link>
+            </div>
+          )}
         </Card>
       </div>
     </div>
