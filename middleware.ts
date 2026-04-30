@@ -1,3 +1,4 @@
+
 import { samkielMiddleware } from '@samkiel/authsdk/next';
 
 export default samkielMiddleware({
