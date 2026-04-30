@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@samkiel/authsdk": "^0.1.0",
+    "@samkiel/authsdk": "file:../authsdk",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
