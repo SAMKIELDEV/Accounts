@@ -47,7 +47,11 @@ function ResetPasswordContent() {
       toast.success('Password updated. Please sign in.');
       router.push('/login');
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred. Please try again.');
+      if (error.message === 'Failed to fetch') {
+        toast.error('We couldn\'t reach the server. Please check your internet connection.');
+      } else {
+        toast.error(error.message || 'We could not reset your password. The link may have expired.');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -31,6 +31,7 @@ function VerifyEmailContent() {
         setStatus('error');
       }
     } catch (error) {
+      console.error('Verification error:', error);
       setStatus('error');
     }
   }, [token]);
