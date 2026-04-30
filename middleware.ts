@@ -1,0 +1,22 @@
+import { samkielMiddleware } from '@samkiel/authsdk/next';
+
+export default samkielMiddleware({
+  protectedRoutes: ['/', '/personal-info', '/security', '/products', '/delete-account'],
+  publicRoutes: ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'],
+  loginPath: '/login',
+  defaultAuthenticatedPath: '/',
+  baseUrl: process.env.NEXT_PUBLIC_AUTH_URL || 'https://id.samkiel.tech',
+});
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};
