@@ -69,17 +69,17 @@ export default function OverviewPage() {
       <div className="space-y-10">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">
-            {greeting}, {user?.name?.split(' ')[0] || 'User'}.
+            {greeting}, {user?.email?.split('@')[0] || 'User'}.
           </h1>
           <div className="flex items-center gap-3">
             <span className="text-[#888888] font-medium">{user?.email}</span>
-            <Badge variant={user?.isVerified ? 'success' : 'warning'}>
-              {user?.isVerified ? 'Verified' : 'Unverified'}
+            <Badge variant={user?.emailVerified ? 'success' : 'warning'}>
+              {user?.emailVerified ? 'Verified' : 'Unverified'}
             </Badge>
           </div>
         </header>
 
-        {!user?.isVerified && (
+        {!user?.emailVerified && (
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-yellow-500">
               <AlertCircle size={20} />

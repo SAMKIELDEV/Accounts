@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -41,7 +41,6 @@ export default function VerifyEmailPage() {
 
   const handleResend = async () => {
     toast.info('Please sign in to resend the verification link.');
-    // In a real app, you might have a dedicated resend endpoint that takes an email
   };
 
   return (
@@ -105,5 +104,17 @@ export default function VerifyEmailPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8FF47]"></div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

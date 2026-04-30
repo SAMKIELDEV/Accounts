@@ -62,7 +62,7 @@ export default function PersonalInfoPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="Full Name"
-                value={user?.name || ''}
+                value={user?.email?.split('@')[0] || ''}
                 readOnly
                 className="opacity-70 cursor-not-allowed"
                 hint="Contact support to change your name"
