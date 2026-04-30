@@ -1,10 +1,10 @@
 
 import { samkielMiddleware } from '@samkiel/authsdk/next';
 
-export default samkielMiddleware({
+export const proxy = samkielMiddleware({
   protectedRoutes: ['/', '/personal-info', '/security', '/products', '/delete-account'],
   publicRoutes: ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'],
-  loginPath: '/login',
+  loginPage: '/login',
   defaultAuthenticatedPath: '/',
   baseUrl: process.env.NEXT_PUBLIC_AUTH_URL || 'https://id.samkiel.tech',
 });
