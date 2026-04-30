@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Figtree } from "next/font/google";
-import { AuthProvider } from "@samkiel/authsdk/react";
-import { Toaster } from "sonner";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const syne = Syne({
@@ -29,10 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${syne.variable} ${figtree.variable} antialiased`}>
-        <AuthProvider>
+        <Providers>
           {children}
-          <Toaster position="bottom-right" richColors />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
