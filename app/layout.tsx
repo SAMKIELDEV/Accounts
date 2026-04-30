@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, Figtree } from "next/font/google";
-import { Providers } from "@/components/Providers";
+import { AuthProvider } from "@samkiel/authsdk/react";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const syne = Syne({
@@ -16,9 +17,8 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: "SAMKIEL Account",
-  description: "Manage your SAMKIEL identity and product access",
-  metadataBase: new URL("https://account.samkiel.tech"),
+  title: "SAMKIEL Accounts",
+  description: "Manage your SAMKIEL account, security, and products.",
 };
 
 export default function RootLayout({
@@ -27,11 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${figtree.variable}`}>
-      <body className="antialiased">
-        <Providers>
+    <html lang="en">
+      <body className={`${syne.variable} ${figtree.variable} antialiased`}>
+        <AuthProvider>
           {children}
-        </Providers>
+          <Toaster position="bottom-right" richColors />
+        </AuthProvider>
       </body>
     </html>
   );
