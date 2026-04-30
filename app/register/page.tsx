@@ -14,25 +14,30 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { register, isAuthenticated } = useAuth();
+  const { register, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await register(name, email, password);
+      // Adjusted to match SDK signature (email, password)
+      await register(email, password);
       toast.success('Account created. Check your email to verify.');
-      // Stay on page as per prompt
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create account.');
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('409') || errorMessage.includes('exists')) {
+        toast.error('An account with this email already exists.');
+      } else {
+        toast.error('We couldn\'t create your account. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

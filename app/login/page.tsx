@@ -13,14 +13,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, user, isAuthenticated } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +31,12 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       router.push('/');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in. Please check your credentials.');
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('401')) {
+        toast.error('Invalid email or password. Please try again.');
+      } else {
+        toast.error('We couldn\'t sign you in. Please check your connection.');
+      }
     } finally {
       setIsLoading(false);
     }
