@@ -13,12 +13,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, user } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      window.location.href = '/';
     }
   }, [user, router]);
 
@@ -27,22 +27,38 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      toast.success('Welcome back!');
-      router.push('/');
-    } catch (error: any) {
-      const errorMessage = error.message || '';
-      
-      if (errorMessage.includes('EMAIL_NOT_VERIFIED')) {
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === 'EMAIL_NOT_VERIFIED') {
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        toast.error(data.error || 'Invalid credentials');
         return;
       }
 
-      if (errorMessage.includes('401')) {
-        toast.error('Invalid email or password. Please try again.');
-      } else {
-        toast.error('We couldn\'t sign you in. Please check your connection.');
-      }
+      // Store tokens in cookies so middleware and SDK can pick them up
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7); // 7 days for refresh token
+      
+      document.cookie = `sk_access_token=${data.accessToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
+      document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax; Secure`;
+      
+      // Also store in localStorage if SDK expects it there
+      localStorage.setItem('samkiel_at', data.accessToken);
+      localStorage.setItem('samkiel_rt', data.refreshToken);
+
+      toast.success('Welcome back!');
+      window.location.href = '/';
+    } catch (error: unknown) {
+      toast.error('We couldn\'t sign you in. Please check your connection.');
     } finally {
       setIsLoading(false);
     }
