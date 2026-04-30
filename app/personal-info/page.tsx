@@ -18,6 +18,8 @@ export default function PersonalInfoPage() {
     if (!newEmail) return;
 
     setIsLoading(true);
+    console.log('--- Process: Update Email ---');
+    console.log('Target URL:', `${process.env.NEXT_PUBLIC_AUTH_URL}/user/email`);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/email`, {
         method: 'PATCH',
@@ -29,13 +31,16 @@ export default function PersonalInfoPage() {
       });
 
       if (response.ok) {
+        console.log('Email update request successful');
         toast.success('Verification email sent to your new address.');
         setNewEmail('');
       } else {
         const data = await response.json();
+        console.error('Email update failed:', data);
         toast.error(data.message || 'Failed to update email.');
       }
     } catch (error) {
+      console.error('Process error:', error);
       toast.error('An error occurred while updating your email.');
     } finally {
       setIsLoading(false);

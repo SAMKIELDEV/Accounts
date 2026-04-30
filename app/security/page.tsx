@@ -24,6 +24,7 @@ export default function SecurityPage() {
     }
 
     setIsLoading(true);
+    console.log('--- Process: Update Password ---');
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/password`, {
         method: 'PATCH',
@@ -38,13 +39,16 @@ export default function SecurityPage() {
       });
 
       if (response.ok) {
+        console.log('Password update successful');
         toast.success('Password updated successfully.');
         setPasswords({ current: '', new: '', confirm: '' });
       } else {
         const data = await response.json();
+        console.error('Password update failed:', data);
         toast.error(data.message || 'Failed to update password.');
       }
     } catch (error) {
+      console.error('Process error:', error);
       toast.error('An error occurred while updating your password.');
     } finally {
       setIsLoading(false);
