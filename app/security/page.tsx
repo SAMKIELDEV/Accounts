@@ -9,9 +9,8 @@ import { toast } from 'sonner';
 import { Monitor, Smartphone, Globe, LogOut, Trash2, ShieldCheck } from 'lucide-react';
 
 interface Session {
-  _id: string;
-  userAgent: string;
-  ip: string;
+  id: string;
+  deviceInfo: string;
   createdAt: string;
   isCurrent?: boolean;
 }
@@ -41,6 +40,7 @@ export default function SecurityPage() {
       });
       if (response.ok) {
         const data = await response.json();
+        // The backend returns sessions: Session[] where each has id and deviceInfo
         setSessions(data.sessions || []);
       }
     } catch (error) {
@@ -98,7 +98,7 @@ export default function SecurityPage() {
       });
 
       if (response.ok) {
-        setSessions(sessions.filter(s => s._id !== sessionId));
+        setSessions(sessions.filter(s => s.id !== sessionId));
         toast.success('Session revoked.');
       } else {
         toast.error('Failed to revoke session.');
@@ -131,9 +131,9 @@ export default function SecurityPage() {
     }
   };
 
-  const getDeviceIcon = (userAgent: string) => {
-    const ua = userAgent.toLowerCase();
-    if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) return <Smartphone className="w-5 h-5" />;
+  const getDeviceIcon = (deviceInfo: string) => {
+    const info = deviceInfo.toLowerCase();
+    if (info.includes('mobile') || info.includes('android') || info.includes('iphone')) return <Smartphone className="w-5 h-5" />;
     return <Monitor className="w-5 h-5" />;
   };
 
@@ -197,7 +197,7 @@ export default function SecurityPage() {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">Active Sessions</h2>
-            {sessions.filter(s => !s.isCurrent).length > 0 && (
+            {sessions.length > 1 && (
               <Button 
                 variant="ghost" 
                 className="text-red-500 hover:text-red-400 hover:bg-red-500/10 h-9"
@@ -228,45 +228,37 @@ export default function SecurityPage() {
                 <div className="w-12 h-12 rounded-full bg-[#1F1F1F] flex items-center justify-center mb-4 text-[#888888]">
                   <Globe className="w-6 h-6" />
                 </div>
-                <p className="text-[#888888] font-medium">No other active sessions.</p>
-                <p className="text-sm text-[#888888]/60 mt-1">You are only logged in on this device.</p>
+                <p className="text-[#888888] font-medium">No active sessions found.</p>
+                <p className="text-sm text-[#888888]/60 mt-1">Wait, you shouldn't be seeing this if you're logged in!</p>
               </Card>
             ) : (
               sessions.map((session) => (
-                <Card key={session._id} className="flex items-center justify-between group">
+                <Card key={session.id} className="flex items-center justify-between group">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center text-[#888888] group-hover:text-white transition-colors">
-                      {getDeviceIcon(session.userAgent)}
+                      {getDeviceIcon(session.deviceInfo)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-white line-clamp-1 max-w-[200px] sm:max-w-md">
-                          {session.userAgent || 'Unknown Device'}
+                          {session.deviceInfo || 'Unknown Device'}
                         </span>
-                        {session.isCurrent && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20">
-                            Current
-                          </span>
-                        )}
+                        {/* Note: Backend currently doesn't flag current session, we show revoke for all for now or we could compare with cookie if possible */}
                       </div>
                       <p className="text-sm text-[#888888] flex items-center gap-2 mt-0.5">
-                        <span>{session.ip}</span>
-                        <span>•</span>
                         <span>{formatDate(session.createdAt)}</span>
                       </p>
                     </div>
                   </div>
-                  {!session.isCurrent && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                      onClick={() => handleRevokeSession(session._id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Revoke
-                    </Button>
-                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                    onClick={() => handleRevokeSession(session.id)}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Revoke
+                  </Button>
                 </Card>
               ))
             )}
