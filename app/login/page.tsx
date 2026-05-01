@@ -52,8 +52,8 @@ export default function LoginPage() {
       document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax; Secure`;
       
       // Also store in localStorage if SDK expects it there
-      localStorage.setItem('samkiel_at', data.accessToken);
-      localStorage.setItem('samkiel_rt', data.refreshToken);
+      localStorage.setItem('samkiel_access_token', data.accessToken);
+      localStorage.setItem('samkiel_refresh_token', data.refreshToken);
 
       toast.success('Welcome back!');
       
