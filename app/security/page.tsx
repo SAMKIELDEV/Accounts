@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
