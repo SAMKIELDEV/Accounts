@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, LayoutDashboard, User, Shield, Grid, Trash2 } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User, Shield, Grid, Trash2, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@samkiel/authsdk/react';
+import { toast } from 'sonner';
 
 const navLinks = [
   { name: 'Overview', href: '/', icon: LayoutDashboard },
@@ -17,8 +19,19 @@ const navLinks = [
 export const TopBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      window.location.href = '/login';
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#0A0A0A] border-b border-[#1F1F1F] z-50 px-6 flex items-center justify-between">
@@ -35,7 +48,7 @@ export const TopBar = () => {
 
       {/* Slide-down overlay */}
       {isOpen && (
-        <div className="fixed inset-0 top-16 bg-[#0A0A0A] z-40 animate-in slide-in-from-top duration-300">
+        <div className="fixed inset-0 top-16 bg-[#0A0A0A] z-40 animate-in slide-in-from-top duration-300 overflow-y-auto">
           <nav className="p-6 space-y-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -58,6 +71,14 @@ export const TopBar = () => {
                 </Link>
               );
             })}
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-4 w-full px-4 py-4 rounded-xl text-[#D4D4D4] hover:bg-white/5 transition-all"
+            >
+              <LogOut size={22} className="text-red-500" />
+              <span className="text-lg font-medium text-red-500">Sign Out</span>
+            </button>
           </nav>
         </div>
       )}

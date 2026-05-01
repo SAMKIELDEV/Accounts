@@ -72,7 +72,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tighter text-[#E8FF47] font-syne mb-2">
-            SAMKIEL
+            SAMKIEL ID
           </h1>
           <p className="text-2xl font-semibold text-white">Welcome back.</p>
         </div>

@@ -8,10 +8,12 @@ import {
   User, 
   Shield, 
   Grid, 
-  Trash2 
+  Trash2,
+  LogOut 
 } from 'lucide-react';
 import { useAuth } from '@samkiel/authsdk/react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const navLinks = [
   { name: 'Overview', href: '/', icon: LayoutDashboard },
@@ -23,13 +25,23 @@ const navLinks = [
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      window.location.href = '/login';
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#0A0A0A] border-r border-[#1F1F1F] flex flex-col hidden lg:flex">
       <div className="p-8">
         <Link href="/" className="text-2xl font-bold tracking-tighter text-[#E8FF47] font-syne">
-          SAMKIEL
+          SAMKIEL ID
         </Link>
       </div>
 
@@ -62,7 +74,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <div className="p-6 border-t border-[#1F1F1F]">
+      <div className="p-6 border-t border-[#1F1F1F] space-y-4">
         <div className="flex flex-col">
           <span className="text-xs text-[#888888] uppercase tracking-wider mb-1">Logged in as</span>
           {isLoading ? (
@@ -73,6 +85,14 @@ export const Sidebar = () => {
             </span>
           )}
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-[#888888] hover:text-white hover:bg-white/5 transition-all group"
+        >
+          <LogOut size={18} className="group-hover:text-red-400 transition-colors" />
+          <span className="font-medium">Sign Out</span>
+        </button>
       </div>
     </aside>
   );
