@@ -26,6 +26,10 @@ export const TopBar = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      // Clear authentication cookies
+      document.cookie = 'sk_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'sk_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+
       toast.success('Logged out successfully');
       window.location.href = '/login';
     } catch (error) {
