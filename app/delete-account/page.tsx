@@ -25,22 +25,22 @@ export default function DeleteAccountPage() {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_at')}`
+          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
         },
         body: JSON.stringify({ password }),
       });
 
       if (response.ok) {
-        await logout();
-        router.push('https://samkiel.tech?deleted=true');
+        localStorage.removeItem('samkiel_access_token');
+        localStorage.removeItem('samkiel_refresh_token');
+        window.location.href = 'https://samkiel.tech?deleted=true';
       } else if (response.status === 401) {
-        toast.error('Your session has expired. Please sign in again.');
+        toast.error('Incorrect password.');
       } else {
-        const data = await response.json();
-        toast.error(data.message || 'We could not delete your account at this time. Please try again.');
+        toast.error('Something went wrong. Try again.');
       }
     } catch (error) {
-      toast.error('An error occurred. Please check your connection and try again.');
+      toast.error('Something went wrong. Try again.');
     } finally {
       setIsLoading(false);
     }
