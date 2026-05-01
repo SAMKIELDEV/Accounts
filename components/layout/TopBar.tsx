@@ -26,13 +26,11 @@ export const TopBar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('samkiel_access_token');
-      localStorage.removeItem('samkiel_refresh_token');
       toast.success('Logged out successfully');
       window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
     }
   };
 
