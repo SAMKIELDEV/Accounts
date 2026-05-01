@@ -11,7 +11,7 @@ import { User, Shield, Grid, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function OverviewPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [greeting, setGreeting] = useState('Good day');
   const [isResending, setIsResending] = useState(false);
 
@@ -64,12 +64,22 @@ export default function OverviewPage() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#E8FF47]"></div>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+
   return (
     <AuthenticatedLayout>
       <div className="space-y-10">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">
-            {greeting}, {user?.email?.split('@')[0] || 'User'}.
+            {greeting}, {user?.name || user?.email || 'there'}.
           </h1>
           <div className="flex items-center gap-3">
             <span className="text-[#888888] font-medium">{user?.email}</span>

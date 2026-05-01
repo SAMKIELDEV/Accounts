@@ -13,12 +13,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (user) {
-      window.location.href = '/';
+      router.push('/');
     }
   }, [user, router]);
 
@@ -56,7 +56,10 @@ export default function LoginPage() {
       localStorage.setItem('samkiel_rt', data.refreshToken);
 
       toast.success('Welcome back!');
-      window.location.href = '/';
+      
+      // Fetch user data into context before redirecting
+      await refresh();
+      router.push('/');
     } catch (error: unknown) {
       toast.error('We couldn\'t sign you in. Please check your connection.');
     } finally {

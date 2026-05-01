@@ -23,7 +23,7 @@ const navLinks = [
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#0A0A0A] border-r border-[#1F1F1F] flex flex-col hidden lg:flex">
@@ -65,9 +65,13 @@ export const Sidebar = () => {
       <div className="p-6 border-t border-[#1F1F1F]">
         <div className="flex flex-col">
           <span className="text-xs text-[#888888] uppercase tracking-wider mb-1">Logged in as</span>
-          <span className="text-sm text-white truncate font-medium">
-            {user?.email || 'Loading...'}
-          </span>
+          {isLoading ? (
+            <div className="h-5 w-32 bg-[#1F1F1F] animate-pulse rounded mt-0.5" />
+          ) : (
+            <span className="text-sm text-white truncate font-medium">
+              {user?.email}
+            </span>
+          )}
         </div>
       </div>
     </aside>
