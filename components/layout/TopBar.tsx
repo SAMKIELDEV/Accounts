@@ -27,8 +27,8 @@ export const TopBar = () => {
     try {
       await logout();
       // Clear authentication cookies
-      document.cookie = 'sk_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      document.cookie = 'sk_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'sk_access_token=; path=/; domain=.samkiel.tech; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'sk_refresh_token=; path=/; domain=.samkiel.tech; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
       toast.success('Logged out successfully');
       window.location.href = '/login';
