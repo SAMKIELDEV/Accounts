@@ -18,19 +18,28 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
 
-  const isValidRedirect = (url: string | null) => {
-    if (!url) return false;
+  const getSafeRedirect = (url: string | null): string => {
+    if (!url) return '/';
     try {
-      const parsed = new URL(url);
-      return parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech');
+      const urlToParse = url.includes('://') ? url : `https://${url}`;
+      const parsed = new URL(urlToParse);
+      if (parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech')) {
+        return urlToParse;
+      }
     } catch {
-      return url.startsWith('/') && !url.startsWith('//');
+      if (url.startsWith('/') && !url.startsWith('//')) return url;
     }
+    return '/';
   };
 
   useEffect(() => {
     if (user) {
-      router.push(isValidRedirect(redirect) ? redirect! : '/');
+      const target = getSafeRedirect(redirect);
+      if (target.startsWith('http')) {
+        window.location.href = target;
+      } else {
+        router.push(target);
+      }
     }
   }, [user, router, redirect]);
 
@@ -60,7 +69,7 @@ function LoginContent() {
       const expires = new Date();
       expires.setDate(expires.getDate() + 7); // 7 days for refresh token
       
-      document.cookie = `sk_access_token=${data.accessToken}; path=/; domain=.samkiel.tech; max-age=3600; SameSite=Lax; Secure`;
+      document.cookie = `sk_access_token=${data.accessToken}; path=/; domain=.samkiel.tech; max-age=900; SameSite=Lax; Secure`;
       document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; domain=.samkiel.tech; max-age=604800; SameSite=Lax; Secure`;
       
       // Also store in localStorage if SDK expects it there
@@ -71,7 +80,12 @@ function LoginContent() {
       
       // Fetch user data into context before redirecting
       await refresh();
-      router.push(isValidRedirect(redirect) ? redirect! : '/');
+      const target = getSafeRedirect(redirect);
+      if (target.startsWith('http')) {
+        window.location.href = target;
+      } else {
+        router.push(target);
+      }
     } catch (error: unknown) {
       toast.error('We couldn\'t sign you in. Please check your connection.');
     } finally {
