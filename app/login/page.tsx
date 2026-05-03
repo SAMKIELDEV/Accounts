@@ -13,7 +13,7 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, refresh, isLoading: authLoading } = useAuth();
+  const { user, refresh, signInWithProvider, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
