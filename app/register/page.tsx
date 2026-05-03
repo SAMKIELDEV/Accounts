@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -135,5 +135,17 @@ export default function RegisterPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <div className="animate-pulse text-[#E8FF47] font-syne text-xl">Loading...</div>
+      </div>
+    }>
+      <RegisterContent />
+    </React.Suspense>
   );
 }
