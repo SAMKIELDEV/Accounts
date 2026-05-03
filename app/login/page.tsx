@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@samkiel/authsdk/react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
@@ -15,12 +15,24 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { user, refresh } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+
+  const isValidRedirect = (url: string | null) => {
+    if (!url) return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech');
+    } catch {
+      return url.startsWith('/') && !url.startsWith('//');
+    }
+  };
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push(isValidRedirect(redirect) ? redirect! : '/');
     }
-  }, [user, router]);
+  }, [user, router, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +60,8 @@ export default function LoginPage() {
       const expires = new Date();
       expires.setDate(expires.getDate() + 7); // 7 days for refresh token
       
-      document.cookie = `sk_access_token=${data.accessToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
-      document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax; Secure`;
+      document.cookie = `sk_access_token=${data.accessToken}; path=/; domain=.samkiel.tech; max-age=3600; SameSite=Lax; Secure`;
+      document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; domain=.samkiel.tech; max-age=604800; SameSite=Lax; Secure`;
       
       // Also store in localStorage if SDK expects it there
       localStorage.setItem('samkiel_access_token', data.accessToken);
@@ -59,7 +71,7 @@ export default function LoginPage() {
       
       // Fetch user data into context before redirecting
       await refresh();
-      router.push('/');
+      router.push(isValidRedirect(redirect) ? redirect! : '/');
     } catch (error: unknown) {
       toast.error('We couldn\'t sign you in. Please check your connection.');
     } finally {
