@@ -13,35 +13,53 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, refresh } = useAuth();
+  const { user, refresh, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
 
-  const getSafeRedirect = (url: string | null): string => {
-    if (!url) return '/';
-    try {
-      const urlToParse = url.includes('://') ? url : `https://${url}`;
-      const parsed = new URL(urlToParse);
-      if (parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech')) {
-        return urlToParse;
-      }
-    } catch {
-      if (url.startsWith('/') && !url.startsWith('//')) return url;
+  // Helper to handle redirection safely
+  const performRedirect = (targetUrl: string | null) => {
+    if (!targetUrl) {
+      router.push('/');
+      return;
     }
-    return '/';
+
+    try {
+      // Normalize URL (handle case where redirect=kiv.samkiel.tech/app)
+      const normalized = targetUrl.includes('://') ? targetUrl : `https://${targetUrl}`;
+      const parsed = new URL(normalized);
+      
+      // Check if it's a valid samkiel.tech subdomain or the root domain
+      const isSamkielDomain = parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech');
+      
+      if (isSamkielDomain) {
+        window.location.href = normalized;
+        return;
+      }
+      
+      // Fallback for internal paths
+      if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
+        router.push(targetUrl);
+        return;
+      }
+    } catch (e) {
+      // If URL parsing fails, check if it's an internal path
+      if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
+        router.push(targetUrl);
+        return;
+      }
+    }
+
+    // Default fallback
+    router.push('/');
   };
 
   useEffect(() => {
-    if (user) {
-      const target = getSafeRedirect(redirect);
-      if (target.startsWith('http')) {
-        window.location.href = target;
-      } else {
-        router.push(target);
-      }
+    if (user && !authLoading) {
+      performRedirect(redirect);
     }
-  }, [user, router, redirect]);
+  }, [user, authLoading, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,12 +98,7 @@ function LoginContent() {
       
       // Fetch user data into context before redirecting
       await refresh();
-      const target = getSafeRedirect(redirect);
-      if (target.startsWith('http')) {
-        window.location.href = target;
-      } else {
-        router.push(target);
-      }
+      performRedirect(redirect);
     } catch (error: unknown) {
       toast.error('We couldn\'t sign you in. Please check your connection.');
     } finally {
@@ -118,7 +131,7 @@ function LoginContent() {
               <div className="flex justify-between items-center">
                 <label className="text-sm font-medium text-[#D4D4D4]">Password</label>
                 <Link 
-                  href="/forgot-password" 
+                  href={redirect ? `/forgot-password?redirect=${encodeURIComponent(redirect)}` : "/forgot-password"} 
                   className="text-xs text-[#888888] hover:text-[#E8FF47] transition-colors"
                 >
                   Forgot your password?
@@ -147,7 +160,7 @@ function LoginContent() {
             <p className="text-[#888888] text-sm">
               Don't have an account?{' '}
               <Link 
-                href="/register" 
+                href={redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : "/register"} 
                 className="text-[#E8FF47] hover:underline font-medium"
               >
                 Create one
