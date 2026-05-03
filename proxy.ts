@@ -13,6 +13,18 @@ export const proxy = async (request: NextRequest) => {
 
   // Redirect authenticated users away from auth pages
   if (isPublic && token) {
+    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    if (redirectParam) {
+      try {
+        const normalizedUrl = redirectParam.startsWith('http') ? redirectParam : `https://${redirectParam}`;
+        const parsedUrl = new URL(normalizedUrl);
+        if (parsedUrl.hostname.endsWith('.samkiel.tech') || parsedUrl.hostname === 'samkiel.tech') {
+          return NextResponse.redirect(parsedUrl.toString());
+        }
+      } catch (e) {
+        // Invalid URL, fallback to '/'
+      }
+    }
     return NextResponse.redirect(new URL('/', request.url));
   }
 
