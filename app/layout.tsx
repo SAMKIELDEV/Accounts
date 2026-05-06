@@ -20,7 +20,13 @@ const figtree = Figtree({
 export const metadata: Metadata = {
   title: "SAMKIEL Accounts",
   description: "Manage your SAMKIEL account, security, and products.",
+  icons: {
+    icon: "/assets/favicon.png",
+  },
 };
+
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function RootLayout({
   children,
@@ -31,7 +37,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${syne.variable} ${figtree.variable} antialiased`}>
         <Providers>
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </div>
         </Providers>
         <Analytics />
         <SpeedInsights />

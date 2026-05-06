@@ -39,3 +39,21 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-syne), sans-serif;
   color: var(--white);
 }
+
+/* Chrome/Safari Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0A0A0A inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.font-syne {
+  font-family: var(--font-syne), sans-serif;
+}
+
+.font-figtree {
+  font-family: var(--font-figtree), sans-serif;
+}
