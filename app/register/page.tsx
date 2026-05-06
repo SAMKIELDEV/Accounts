@@ -91,7 +91,7 @@ function RegisterContent() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              hint="At least 8 characters"
+              hint="Minimum 6 characters"
               className="bg-[#0A0A0A]/50"
             />
 

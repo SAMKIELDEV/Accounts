@@ -175,7 +175,7 @@ export default function SecurityPage() {
                 onChange={(e) => setPasswords({...passwords, new: e.target.value})}
                 required
                 disabled={isLoading}
-                hint="Minimum 8 characters"
+                hint="Minimum 6 characters"
               />
               <Input
                 label="Confirm New Password"
