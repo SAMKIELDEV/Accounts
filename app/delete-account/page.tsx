@@ -15,32 +15,23 @@ export default function DeleteAccountPage() {
   const [confirmText, setConfirmText] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { logout } = useAuth();
+  const { deleteAccount } = useAuth();
   const router = useRouter();
 
   const handleDeleteAccount = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/account`, {
-        method: 'DELETE',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
-        },
-        body: JSON.stringify({ password }),
-      });
-
-      if (response.ok) {
-        localStorage.removeItem('samkiel_access_token');
-        localStorage.removeItem('samkiel_refresh_token');
-        window.location.href = 'https://samkiel.tech?deleted=true';
-      } else if (response.status === 401) {
+      await deleteAccount(password);
+      toast.success('Account deleted successfully.');
+      // Redirect to SAMKIEL ID login page
+      window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/login?deleted=true`;
+    } catch (error: any) {
+      if (error.message?.includes('Invalid password') || error.status === 401) {
         toast.error('Incorrect password.');
       } else {
         toast.error('Something went wrong. Try again.');
       }
-    } catch (error) {
-      toast.error('Something went wrong. Try again.');
     } finally {
       setIsLoading(false);
     }

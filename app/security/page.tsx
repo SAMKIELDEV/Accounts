@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@samkiel/authsdk/react';
 import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
-import { Monitor, Smartphone, Globe, LogOut, Trash2, ShieldCheck } from 'lucide-react';
+import { Monitor, Smartphone, Globe, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Session {
@@ -17,6 +18,7 @@ interface Session {
 }
 
 export default function SecurityPage() {
+  const { updatePassword, getSessions, revokeSession, revokeAllSessions, logout } = useAuth();
   const [passwords, setPasswords] = useState({
     current: '',
     new: '',
@@ -34,17 +36,11 @@ export default function SecurityPage() {
   const fetchSessions = async () => {
     setIsSessionsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/sessions`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSessions(data.sessions || []);
-      }
+      const activeSessions = await getSessions();
+      setSessions(activeSessions || []);
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
+      toast.error('Failed to load active sessions.');
     } finally {
       setIsSessionsLoading(false);
     }
@@ -57,31 +53,23 @@ export default function SecurityPage() {
       return;
     }
 
+    if (passwords.new.length < 6) {
+      toast.error('New password must be at least 6 characters.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/password`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
-        },
-        body: JSON.stringify({ 
-          currentPassword: passwords.current,
-          newPassword: passwords.new 
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Password updated.');
-        setPasswords({ current: '', new: '', confirm: '' });
-      } else if (response.status === 401) {
+      await updatePassword(passwords.current, passwords.new);
+      toast.success('Password updated successfully.');
+      setPasswords({ current: '', new: '', confirm: '' });
+    } catch (error: any) {
+      const message = error.message || 'Could not update password.';
+      if (message.includes('current password')) {
         toast.error('Current password is incorrect.');
       } else {
-        const data = await response.json();
-        toast.error(data.message || 'Could not update password.');
+        toast.error(message);
       }
-    } catch (error) {
-      toast.error('An error occurred while updating your password.');
     } finally {
       setIsLoading(false);
     }
@@ -89,19 +77,18 @@ export default function SecurityPage() {
 
   const handleRevokeSession = async (sessionId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
-        }
-      });
-
-      if (response.ok) {
-        setSessions(sessions.filter(s => s.id !== sessionId));
-        toast.success('Session revoked.');
-      } else {
-        toast.error('Failed to revoke session.');
+      await revokeSession(sessionId);
+      
+      const sessionToRevoke = sessions.find(s => s.id === sessionId);
+      if (sessionToRevoke?.isCurrent) {
+        toast.success('Current session revoked. Logging out...');
+        await logout();
+        window.location.href = '/login';
+        return;
       }
+
+      setSessions(sessions.filter(s => s.id !== sessionId));
+      toast.success('Session revoked.');
     } catch (error) {
       toast.error('An error occurred while revoking the session.');
     }
@@ -110,21 +97,11 @@ export default function SecurityPage() {
   const handleSignOutOtherDevices = async () => {
     setIsRevokingAll(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/sessions`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
-        }
-      });
-
-      if (response.ok) {
-        await fetchSessions();
-        toast.success('All other sessions signed out.');
-      } else {
-        toast.error('Failed to sign out other devices.');
-      }
+      await revokeAllSessions();
+      await fetchSessions();
+      toast.success('All other sessions signed out.');
     } catch (error) {
-      toast.error('An error occurred.');
+      toast.error('An error occurred while revoking sessions.');
     } finally {
       setIsRevokingAll(false);
     }
