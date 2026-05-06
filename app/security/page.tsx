@@ -13,9 +13,12 @@ import { Skeleton } from '@/components/ui/Skeleton';
 interface Session {
   id: string;
   deviceInfo: string;
+  ipAddress?: string;
   createdAt: string;
+  lastActiveAt: string;
   isCurrent?: boolean;
 }
+
 
 export default function SecurityPage() {
   const { updatePassword, getSessions, revokeSession, revokeAllSessions, logout } = useAuth();
@@ -219,9 +222,16 @@ export default function SecurityPage() {
                         <span className="font-medium text-white line-clamp-1 max-w-[200px] sm:max-w-md">
                           {session.deviceInfo || 'Unknown Device'}
                         </span>
+                        {session.isCurrent && (
+                          <span className="text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full font-semibold border border-green-500/20">
+                            This device
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-[#888888] flex items-center gap-2 mt-0.5">
-                        <span>{formatDate(session.createdAt)}</span>
+                        <span>{session.ipAddress || 'Unknown IP'}</span>
+                        <span className="w-1 h-1 rounded-full bg-[#333333]" />
+                        <span>Last active: {formatDate(session.lastActiveAt)}</span>
                       </p>
                     </div>
                   </div>
