@@ -30,9 +30,10 @@ function RegisterContent() {
     setIsLoading(true);
 
     try {
-      // Adjusted to match SDK signature (email, password)
-      await register(email, password);
+      // Adjusted to match SDK signature (name, email, password)
+      await register(name, email, password);
       toast.success('Account created. Check your email to verify.');
+
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('409') || errorMessage.includes('exists')) {
