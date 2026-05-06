@@ -8,10 +8,53 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
 
+import { Skeleton } from '@/components/ui/Skeleton';
+
 export default function PersonalInfoPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [newEmail, setNewEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  if (authLoading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="space-y-10">
+          <header className="space-y-2">
+            <Skeleton className="h-8 w-[200px]" />
+            <Skeleton className="h-4 w-[350px]" />
+          </header>
+
+          <section className="space-y-6">
+            <Card className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[80px]" />
+                  <Skeleton className="h-11 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[80px]" />
+                  <Skeleton className="h-11 w-full" />
+                </div>
+              </div>
+            </Card>
+            
+            <div className="space-y-4 pt-4">
+              <Skeleton className="h-6 w-[150px]" />
+              <Card className="p-6">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[120px]" />
+                    <Skeleton className="h-11 w-full" />
+                  </div>
+                  <Skeleton className="h-11 w-[180px]" />
+                </div>
+              </Card>
+            </div>
+          </section>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -57,3 +57,13 @@ input:-webkit-autofill:active {
 .font-figtree {
   font-family: var(--font-figtree), sans-serif;
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

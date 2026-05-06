@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
 import { Monitor, Smartphone, Globe, LogOut, Trash2, ShieldCheck } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Session {
   id: string;
@@ -40,7 +41,6 @@ export default function SecurityPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        // The backend returns sessions: Session[] where each has id and deviceInfo
         setSessions(data.sessions || []);
       }
     } catch (error) {
@@ -52,7 +52,6 @@ export default function SecurityPage() {
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (passwords.new !== passwords.confirm) {
       toast.error('New passwords do not match.');
       return;
@@ -212,15 +211,15 @@ export default function SecurityPage() {
           <div className="grid gap-4">
             {isSessionsLoading ? (
               [1, 2].map((i) => (
-                <Card key={i} className="animate-pulse flex items-center justify-between py-6">
+                <Card key={i} className="flex items-center justify-between py-6 border-[#1F1F1F]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#1F1F1F]" />
+                    <Skeleton className="w-10 h-10 rounded-full" />
                     <div className="space-y-2">
-                      <div className="w-32 h-4 bg-[#1F1F1F] rounded" />
-                      <div className="w-24 h-3 bg-[#1F1F1F] rounded" />
+                      <Skeleton className="h-4 w-[160px]" />
+                      <Skeleton className="h-3 w-[120px]" />
                     </div>
                   </div>
-                  <div className="w-20 h-9 bg-[#1F1F1F] rounded" />
+                  <Skeleton className="w-[80px] h-9 rounded-lg" />
                 </Card>
               ))
             ) : sessions.length === 0 ? (
@@ -243,7 +242,6 @@ export default function SecurityPage() {
                         <span className="font-medium text-white line-clamp-1 max-w-[200px] sm:max-w-md">
                           {session.deviceInfo || 'Unknown Device'}
                         </span>
-                        {/* Note: Backend currently doesn't flag current session, we show revoke for all for now or we could compare with cookie if possible */}
                       </div>
                       <p className="text-sm text-[#888888] flex items-center gap-2 mt-0.5">
                         <span>{formatDate(session.createdAt)}</span>

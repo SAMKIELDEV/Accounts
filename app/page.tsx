@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { User, Shield, Grid, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function OverviewPage() {
   const { user, isLoading } = useAuth();
@@ -67,8 +68,31 @@ export default function OverviewPage() {
   if (isLoading) {
     return (
       <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#E8FF47]"></div>
+        <div className="space-y-10">
+          <header className="space-y-3">
+            <Skeleton className="h-10 w-[300px]" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-5 w-[60px] rounded-full" />
+            </div>
+          </header>
+
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-5 border-[#1F1F1F]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-12 h-12 rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-[120px]" />
+                      <Skeleton className="h-4 w-[180px]" />
+                    </div>
+                  </div>
+                  <Skeleton className="w-5 h-5" />
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </AuthenticatedLayout>
     );
