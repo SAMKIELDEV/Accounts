@@ -13,7 +13,7 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, refresh, signInWithProvider, isLoading: authLoading } = useAuth();
+  const { user, login, signInWithProvider, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   // Honor both ?redirect=... (legacy) and ?callbackUrl=... (used by samkielMiddleware
@@ -65,31 +65,31 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
+      const data = await login(email, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (data.error === 'EMAIL_NOT_VERIFIED') {
-          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-          return;
-        }
-        toast.error(data.error || 'Invalid credentials');
-        return;
+      // Chrome's third-party cookie phase-out can drop the cross-origin Set-Cookie
+      // from id.samkiel.tech even though we're same-site. Mirror the tokens into
+      // first-party cookies on this origin so the proxy middleware can read them.
+      if (data.accessToken && data.refreshToken) {
+        const accessMaxAge = data.expiresIn ?? 900;
+        document.cookie = `sk_access_token=${data.accessToken}; path=/; domain=.samkiel.tech; max-age=${accessMaxAge}; SameSite=Lax; Secure`;
+        document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; domain=.samkiel.tech; max-age=604800; SameSite=Lax; Secure`;
       }
 
       toast.success('Welcome back!');
-
-      // Server already set HttpOnly cookies via Set-Cookie; refresh user context, then redirect.
-      await refresh();
       performRedirect(redirect);
     } catch (error: unknown) {
-      toast.error('We couldn\'t sign you in. Please check your connection.');
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('EMAIL_NOT_VERIFIED')) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+      const status = (error as { status?: number } | null)?.status;
+      if (status === 401) {
+        toast.error('Invalid credentials');
+      } else {
+        toast.error(message || "We couldn't sign you in. Please check your connection.");
+      }
     } finally {
       setIsLoading(false);
     }
