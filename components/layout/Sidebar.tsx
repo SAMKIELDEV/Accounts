@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { navLinks } from '@/lib/nav';
 import { useLogout } from '@/hooks/useLogout';
 import { Avatar } from '@/components/ui/Avatar';
-import '@/lib/types';
 
 export const Sidebar = () => {
   const pathname = usePathname();

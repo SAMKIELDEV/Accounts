@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@samkiel/authsdk": "^1.2.0",
+    "@samkiel/authsdk": "file:../authsdk",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",

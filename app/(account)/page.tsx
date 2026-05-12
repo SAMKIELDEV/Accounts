@@ -10,7 +10,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import '@/lib/types';
 
 export default function OverviewPage() {
   const { user, isLoading } = useAuth();
