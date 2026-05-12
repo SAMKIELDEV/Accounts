@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 export default function PersonalInfoPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [newEmail, setNewEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   if (authLoading) {
@@ -58,25 +59,31 @@ export default function PersonalInfoPage() {
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail) return;
+    if (!newEmail || !currentPassword) return;
 
     setIsLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/email`, {
         method: 'PATCH',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('samkiel_access_token')}`
         },
-        body: JSON.stringify({ newEmail }),
+        credentials: 'include',
+        body: JSON.stringify({ newEmail, currentPassword }),
       });
 
       if (response.ok) {
         toast.success('Verification email sent to your new address.');
         setNewEmail('');
+        setCurrentPassword('');
       } else {
-        const data = await response.json();
-        toast.error(data.message || 'An error occurred while updating your email.');
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          toast.error('Incorrect password. Please try again.');
+        } else {
+          toast.error(data.message || data.error || 'An error occurred while updating your email.');
+        }
       }
     } catch (error) {
       toast.error('An error occurred while updating your email.');
@@ -126,10 +133,21 @@ export default function PersonalInfoPage() {
                   disabled={isLoading}
                   hint="You will need to verify the new email address."
                 />
-                <Button 
-                  type="submit" 
+                <Input
+                  label="Current Password"
+                  type="password"
+                  placeholder="Enter your current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                  hint="Required to confirm it's you."
+                />
+                <Button
+                  type="submit"
                   isLoading={isLoading}
-                  disabled={!newEmail}
+                  disabled={!newEmail || !currentPassword}
                 >
                   Send Verification
                 </Button>
