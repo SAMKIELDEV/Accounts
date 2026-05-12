@@ -34,7 +34,7 @@ export const TopBar = () => {
         type="button"
         onClick={toggleMenu}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
-        aria-expanded={isOpen}
+        {...{ 'aria-expanded': isOpen ? 'true' : 'false' }}
         className="p-2 text-white hover:bg-white/5 rounded-lg transition-colors"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}

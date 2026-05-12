@@ -70,7 +70,7 @@ export const Navbar = () => {
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center justify-center text-white md:hidden"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={menuOpen}
+          {...{ 'aria-expanded': menuOpen ? 'true' : 'false' }}
         >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
