@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@samkiel/authsdk/react';
-import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -67,40 +66,37 @@ export default function OverviewPage() {
 
   if (isLoading) {
     return (
-      <AuthenticatedLayout>
-        <div className="space-y-10">
-          <header className="space-y-3">
-            <Skeleton className="h-10 w-[300px]" />
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-4 w-[150px]" />
-              <Skeleton className="h-5 w-[60px] rounded-full" />
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="p-5 border-[#1F1F1F]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="w-12 h-12 rounded-lg" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-5 w-[120px]" />
-                      <Skeleton className="h-4 w-[180px]" />
-                    </div>
-                  </div>
-                  <Skeleton className="w-5 h-5" />
-                </div>
-              </Card>
-            ))}
+      <div className="space-y-10">
+        <header className="space-y-3">
+          <Skeleton className="h-10 w-[300px]" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-4 w-[150px]" />
+            <Skeleton className="h-5 w-[60px] rounded-full" />
           </div>
+        </header>
+
+        <div className="grid grid-cols-1 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="p-5 border-[#1F1F1F]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-12 h-12 rounded-lg" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-[120px]" />
+                    <Skeleton className="h-4 w-[180px]" />
+                  </div>
+                </div>
+                <Skeleton className="w-5 h-5" />
+              </div>
+            </Card>
+          ))}
         </div>
-      </AuthenticatedLayout>
+      </div>
     );
   }
 
   return (
-    <AuthenticatedLayout>
-      <div className="space-y-10">
+    <div className="space-y-10">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">
             {greeting}, {user?.name || user?.email || 'there'}.
@@ -154,6 +150,5 @@ export default function OverviewPage() {
           ))}
         </div>
       </div>
-    </AuthenticatedLayout>
   );
 }

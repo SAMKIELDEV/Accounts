@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@samkiel/authsdk/react';
-import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -38,8 +37,7 @@ export default function DeleteAccountPage() {
   };
 
   return (
-    <AuthenticatedLayout>
-      <div className="space-y-10">
+    <div className="space-y-10">
         <header>
           <h1 className="text-3xl font-bold tracking-tight text-red-500">Delete Account</h1>
           <p className="text-[#888888] mt-1">Permanently remove your account and all associated data.</p>
@@ -86,12 +84,19 @@ export default function DeleteAccountPage() {
                 autoFocus
               />
               <div className="flex gap-3">
-                <Button variant="ghost" className="flex-1" onClick={() => setStep(1)}>
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => {
+                    setConfirmText('');
+                    setStep(1);
+                  }}
+                >
                   Back
                 </Button>
-                <Button 
-                  variant="danger" 
-                  className="flex-[2]" 
+                <Button
+                  variant="danger"
+                  className="flex-[2]"
                   disabled={confirmText !== 'DELETE'}
                   onClick={() => setStep(3)}
                 >
@@ -141,8 +146,7 @@ export default function DeleteAccountPage() {
               </form>
             </Card>
           )}
-        </div>
       </div>
-    </AuthenticatedLayout>
+    </div>
   );
 }

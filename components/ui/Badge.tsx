@@ -12,14 +12,14 @@ export const Badge = ({ children, variant = 'default', className }: BadgeProps) 
     success: 'text-green-500 border-green-500/20 bg-green-500/10',
     warning: 'text-yellow-500 border-yellow-500/20 bg-yellow-500/10',
     danger: 'text-red-500 border-red-500/20 bg-red-500/10',
-    default: 'text-[#888888] border-[#1F1F1F] bg-[#111111]',
+    default: 'text-muted border-border bg-surface',
   };
 
   const dots = {
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
     danger: 'bg-red-500',
-    default: 'bg-[#888888]',
+    default: 'bg-muted',
   };
 
   return (

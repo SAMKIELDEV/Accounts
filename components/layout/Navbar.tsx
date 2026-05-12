@@ -3,28 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const pathname = usePathname()
-
-  const isDashboard = pathname === '/' || 
-                      pathname?.startsWith('/security') || 
-                      pathname?.startsWith('/personal-info') || 
-                      pathname?.startsWith('/products') || 
-                      pathname?.startsWith('/delete-account')
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  if (isDashboard) return null;
 
   return (
     <nav

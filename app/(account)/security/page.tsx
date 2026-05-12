@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
-import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -127,8 +126,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <AuthenticatedLayout>
-      <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20">
         <header>
           <h1 className="text-3xl font-bold tracking-tight">Security</h1>
           <p className="text-[#888888] mt-1">Manage your password and active sessions.</p>
@@ -248,8 +246,7 @@ export default function SecurityPage() {
               ))
             )}
           </div>
-        </section>
-      </div>
-    </AuthenticatedLayout>
+      </section>
+    </div>
   );
 }

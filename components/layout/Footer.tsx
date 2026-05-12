@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail } from 'lucide-react'
 
@@ -42,16 +41,6 @@ const legalLinks = [
 ]
 
 export const Footer = () => {
-  const pathname = usePathname()
-
-  const isDashboard = pathname === '/' || 
-                      pathname?.startsWith('/security') || 
-                      pathname?.startsWith('/personal-info') || 
-                      pathname?.startsWith('/products') || 
-                      pathname?.startsWith('/delete-account')
-
-  if (isDashboard) return null;
-
   return (
     <motion.footer
       className="relative bg-[#0A0A0A]"

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@samkiel/authsdk/react';
@@ -21,7 +21,7 @@ function LoginContent() {
   const redirect = searchParams.get('redirect') ?? searchParams.get('callbackUrl');
 
   // Helper to handle redirection safely
-  const performRedirect = (targetUrl: string | null) => {
+  const performRedirect = useCallback((targetUrl: string | null) => {
     if (!targetUrl) {
       router.push('/');
       return;
@@ -52,13 +52,13 @@ function LoginContent() {
 
     // Default fallback
     router.push('/');
-  };
+  }, [router]);
 
   useEffect(() => {
     if (user && !authLoading) {
       performRedirect(redirect);
     }
-  }, [user, authLoading, redirect]);
+  }, [user, authLoading, redirect, performRedirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

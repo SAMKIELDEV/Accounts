@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
-import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ExternalLink, Globe } from 'lucide-react';
@@ -48,8 +47,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <AuthenticatedLayout>
-      <div className="space-y-10">
+    <div className="space-y-10">
         <header>
           <h1 className="text-3xl font-bold tracking-tight">Connected Products</h1>
           <p className="text-[#888888] mt-1">Access your SAMKIEL ecosystem from one place.</p>
@@ -122,8 +120,7 @@ export default function ProductsPage() {
           <p className="text-sm text-[#888888] text-center">
             Full session management per product coming soon.
           </p>
-        </div>
       </div>
-    </AuthenticatedLayout>
+    </div>
   );
 }

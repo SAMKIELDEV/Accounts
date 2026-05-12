@@ -25,11 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-
-import { AlertProvider } from "@/lib/context/AlertContext";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,17 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${syne.variable} ${figtree.variable} antialiased`}>
-        <Providers>
-          <AlertProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <div className="flex-1">
-                {children}
-              </div>
-              <Footer />
-            </div>
-          </AlertProvider>
-        </Providers>
+        <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
       </body>
