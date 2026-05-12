@@ -99,22 +99,22 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#0A0A0A] relative overflow-hidden pt-32 pb-20">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background relative overflow-hidden pt-32 pb-20">
       {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#E8FF47]/5 blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#E8FF47]/5 blur-[120px]" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent/5 blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/5 blur-[120px]" />
 
       <div className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-bold tracking-tight text-white font-syne">
             Welcome back.
           </h2>
-          <p className="text-[#888888]">
+          <p className="text-muted">
             Sign in to your SAMKIEL account to continue.
           </p>
         </div>
 
-        <Card className="p-8 bg-[#111111]/50 backdrop-blur-xl border-[#1F1F1F] shadow-2xl">
+        <Card className="p-8 bg-surface/50 backdrop-blur-xl border-border shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Email Address"
@@ -124,14 +124,14 @@ function LoginContent() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
-              className="bg-[#0A0A0A]/50"
+              className="bg-background/50"
             />
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-[#D4D4D4]">Password</label>
+                <label className="text-sm font-medium text-text">Password</label>
                 <Link 
                   href={redirect ? `/forgot-password?redirect=${encodeURIComponent(redirect)}` : "/forgot-password"} 
-                  className="text-xs text-[#888888] hover:text-[#E8FF47] transition-colors"
+                  className="text-xs text-muted hover:text-accent transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -143,7 +143,7 @@ function LoginContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-[#0A0A0A]/50"
+                className="bg-background/50"
               />
             </div>
 
@@ -151,7 +151,7 @@ function LoginContent() {
               type="submit" 
               fullWidth 
               isLoading={isLoading}
-              className="h-12 text-base font-bold bg-[#E8FF47] text-black hover:bg-[#d4eb3a] transition-all duration-300 shadow-[0_0_20px_rgba(232,255,71,0.15)] hover:shadow-[0_0_25px_rgba(232,255,71,0.25)]"
+              className="h-12 text-base font-bold hover:brightness-110 transition-all duration-300"
             >
               Sign In
             </Button>
@@ -160,10 +160,10 @@ function LoginContent() {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#1F1F1F]"></div>
+                <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase tracking-widest">
-                <span className="bg-[#111111] px-3 text-[#52525B] font-medium">Or</span>
+                <span className="bg-surface px-3 text-muted/70 font-medium">Or</span>
               </div>
             </div>
 
@@ -172,7 +172,7 @@ function LoginContent() {
                 variant="outline"
                 fullWidth
                 onClick={() => signInWithProvider('google', redirect || undefined)}
-                className="h-12 bg-transparent border-[#1F1F1F] text-white hover:bg-white/5 transition-all duration-300 gap-3"
+                className="h-12 bg-transparent border-border text-white hover:bg-white/5 transition-all duration-300 gap-3"
               >
                 <svg className="h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
                   <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
@@ -182,12 +182,12 @@ function LoginContent() {
             </div>
           </div>
 
-          <div className="mt-10 pt-8 border-t border-[#1F1F1F] text-center">
-            <p className="text-[#888888] text-sm">
+          <div className="mt-10 pt-8 border-t border-border text-center">
+            <p className="text-muted text-sm">
               New to SAMKIEL?{' '}
               <Link 
                 href={redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : "/register"} 
-                className="text-[#E8FF47] hover:underline font-bold transition-all"
+                className="text-accent hover:underline font-bold transition-all"
               >
                 Create an account
               </Link>
@@ -202,8 +202,8 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="animate-pulse text-[#E8FF47] font-syne text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-accent font-syne text-xl">Loading...</div>
       </div>
     }>
       <LoginContent />
