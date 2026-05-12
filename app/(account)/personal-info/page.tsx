@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-type UserWithAvatar = NonNullable<ReturnType<typeof useAuth>['user']> & { avatar?: string };
+import '@/lib/types';
 
 function getAccessToken(): string | undefined {
   if (typeof document === 'undefined') return undefined;
@@ -32,7 +31,6 @@ function formatJoinDate(iso?: string) {
 
 export default function PersonalInfoPage() {
   const { user, isLoading: authLoading, refresh } = useAuth();
-  const u = user as UserWithAvatar | null;
 
   const [name, setName] = useState(user?.name ?? '');
   const [isSavingName, setIsSavingName] = useState(false);
@@ -181,7 +179,7 @@ export default function PersonalInfoPage() {
         <Card className="h-fit space-y-6">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="relative">
-              <Avatar src={u?.avatar} name={user?.name} email={user?.email} size="xl" />
+              <Avatar src={user?.avatar} name={user?.name} email={user?.email} size="xl" />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}

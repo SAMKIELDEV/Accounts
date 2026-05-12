@@ -9,17 +9,15 @@ import { cn } from '@/lib/utils';
 import { navLinks } from '@/lib/nav';
 import { useLogout } from '@/hooks/useLogout';
 import { Avatar } from '@/components/ui/Avatar';
-
-type UserWithAvatar = NonNullable<ReturnType<typeof useAuth>['user']> & { avatar?: string };
+import '@/lib/types';
 
 export const Sidebar = () => {
   const pathname = usePathname();
   const { user, isLoading } = useAuth();
   const handleLogout = useLogout();
-  const avatar = (user as UserWithAvatar | null)?.avatar;
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-background border-r border-border flex-col hidden lg:flex">
+    <aside className="fixed left-0 top-0 bottom-0 w-65 bg-background border-r border-border flex-col hidden lg:flex">
       <div className="p-8">
         <Link href="/" className="text-2xl font-bold tracking-tighter text-accent font-syne">
           SAMKIEL ID
@@ -67,7 +65,7 @@ export const Sidebar = () => {
             </>
           ) : (
             <>
-              <Avatar src={avatar} name={user?.name} email={user?.email} size="md" />
+              <Avatar src={user?.avatar} name={user?.name} email={user?.email} size="md" />
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] text-muted uppercase tracking-wider">Signed in as</span>
                 <span className="text-sm text-white truncate font-medium">

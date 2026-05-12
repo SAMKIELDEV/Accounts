@@ -10,14 +10,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-type UserWithAvatar = NonNullable<ReturnType<typeof useAuth>['user']> & { avatar?: string };
+import '@/lib/types';
 
 export default function OverviewPage() {
   const { user, isLoading } = useAuth();
   const [greeting, setGreeting] = useState('Good day');
   const [isResending, setIsResending] = useState(false);
-  const avatar = (user as UserWithAvatar | null)?.avatar;
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -104,7 +102,7 @@ export default function OverviewPage() {
     <div className="space-y-12">
       {/* Hero */}
       <header className="flex flex-col sm:flex-row sm:items-center gap-6">
-        <Avatar src={avatar} name={user?.name} email={user?.email} size="xl" />
+        <Avatar src={user?.avatar} name={user?.name} email={user?.email} size="xl" />
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight font-syne">
             {greeting}, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there'}.
