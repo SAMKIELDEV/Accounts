@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
+import { SamkielAuthError } from '@samkiel/authsdk';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -10,15 +11,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import '@/lib/types';
-
-function getAccessToken(): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  return document.cookie
-    .split('; ')
-    .find((c) => c.startsWith('sk_access_token='))
-    ?.split('=')[1];
-}
 
 function formatJoinDate(iso?: string) {
   if (!iso) return null;
@@ -30,7 +22,7 @@ function formatJoinDate(iso?: string) {
 }
 
 export default function PersonalInfoPage() {
-  const { user, isLoading: authLoading, refresh } = useAuth();
+  const { user, isLoading: authLoading, updateName, updateEmail, uploadAvatar } = useAuth();
 
   const [name, setName] = useState(user?.name ?? '');
   const [isSavingName, setIsSavingName] = useState(false);
@@ -42,7 +34,7 @@ export default function PersonalInfoPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Keep local name in sync when user loads
+  // Sync local name state when user loads
   React.useEffect(() => {
     if (user?.name && !name) setName(user.name);
   }, [user?.name, name]);
@@ -67,26 +59,16 @@ export default function PersonalInfoPage() {
 
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || name.trim() === user?.name) return;
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === user?.name) return;
 
     setIsSavingName(true);
     try {
-      const token = getAccessToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/name`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: 'include',
-        body: JSON.stringify({ name: name.trim() }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update name');
+      await updateName(trimmed);
       toast.success('Name updated.');
-      await refresh();
-    } catch {
-      toast.error('Could not update your name. Please try again.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not update your name.';
+      toast.error(msg);
     } finally {
       setIsSavingName(false);
     }
@@ -98,31 +80,20 @@ export default function PersonalInfoPage() {
 
     setIsSavingEmail(true);
     try {
-      const token = getAccessToken();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/email`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: 'include',
-        body: JSON.stringify({ newEmail, currentPassword }),
-      });
-
-      if (response.ok) {
-        toast.success('Verification email sent to your new address.');
-        setNewEmail('');
-        setCurrentPassword('');
+      await updateEmail(newEmail, currentPassword);
+      toast.success('Verification email sent to your new address.');
+      setNewEmail('');
+      setCurrentPassword('');
+    } catch (err) {
+      const status = err instanceof SamkielAuthError ? err.status : undefined;
+      if (status === 401) {
+        toast.error('Incorrect password. Please try again.');
+      } else if (status === 409) {
+        toast.error('That email is already in use.');
       } else {
-        const data = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-          toast.error('Incorrect password. Please try again.');
-        } else {
-          toast.error(data.message || data.error || 'Could not update email.');
-        }
+        const msg = err instanceof Error ? err.message : 'Could not update email.';
+        toast.error(msg);
       }
-    } catch {
-      toast.error('An error occurred while updating your email.');
     } finally {
       setIsSavingEmail(false);
     }
@@ -143,24 +114,11 @@ export default function PersonalInfoPage() {
 
     setIsUploading(true);
     try {
-      const token = getAccessToken();
-      const form = new FormData();
-      form.append('file', file);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/user/avatar`, {
-        method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: 'include',
-        body: form,
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
+      await uploadAvatar(file);
       toast.success('Profile picture updated.');
-      await refresh();
-    } catch {
-      toast.error('Could not upload your photo. Please try again.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not upload your photo.';
+      toast.error(msg);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
