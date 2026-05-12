@@ -16,7 +16,9 @@ function LoginContent() {
   const { user, refresh, signInWithProvider, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
+  // Honor both ?redirect=... (legacy) and ?callbackUrl=... (used by samkielMiddleware
+  // and the proxy's root-protection branch). Prefer `redirect` for backward compat.
+  const redirect = searchParams.get('redirect') ?? searchParams.get('callbackUrl');
 
   // Helper to handle redirection safely
   const performRedirect = (targetUrl: string | null) => {
@@ -25,30 +27,27 @@ function LoginContent() {
       return;
     }
 
+    // Internal path on this accounts site — handle BEFORE URL parsing so
+    // values like "/" don't get mangled into "https:///".
+    if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
+      router.push(targetUrl);
+      return;
+    }
+
     try {
       // Normalize URL (handle case where redirect=kiv.samkiel.tech/app)
       const normalized = targetUrl.includes('://') ? targetUrl : `https://${targetUrl}`;
       const parsed = new URL(normalized);
-      
+
       // Check if it's a valid samkiel.tech subdomain or the root domain
       const isSamkielDomain = parsed.hostname === 'samkiel.tech' || parsed.hostname.endsWith('.samkiel.tech');
-      
+
       if (isSamkielDomain) {
         window.location.href = normalized;
         return;
       }
-      
-      // Fallback for internal paths
-      if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
-        router.push(targetUrl);
-        return;
-      }
-    } catch (e) {
-      // If URL parsing fails, check if it's an internal path
-      if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
-        router.push(targetUrl);
-        return;
-      }
+    } catch {
+      // fall through to default
     }
 
     // Default fallback

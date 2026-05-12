@@ -13,15 +13,25 @@ export const proxy = async (request: NextRequest) => {
 
   // Redirect authenticated users away from auth pages
   if (isPublic && token) {
-    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    // Honor both `redirect` (legacy) and `callbackUrl` (used by samkielMiddleware
+    // and the root-protection branch below).
+    const redirectParam =
+      request.nextUrl.searchParams.get('redirect') ??
+      request.nextUrl.searchParams.get('callbackUrl');
+
     if (redirectParam) {
+      // Internal same-site path — keep them on this origin to avoid bouncing
+      // through an external URL parse step that would mangle "/" etc.
+      if (redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+        return NextResponse.redirect(new URL(redirectParam, request.url));
+      }
       try {
         const normalizedUrl = redirectParam.startsWith('http') ? redirectParam : `https://${redirectParam}`;
         const parsedUrl = new URL(normalizedUrl);
         if (parsedUrl.hostname.endsWith('.samkiel.tech') || parsedUrl.hostname === 'samkiel.tech') {
           return NextResponse.redirect(parsedUrl.toString());
         }
-      } catch (e) {
+      } catch {
         // Invalid URL, fallback to '/'
       }
     }
