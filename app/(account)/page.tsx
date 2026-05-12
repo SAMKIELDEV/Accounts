@@ -6,14 +6,18 @@ import { useAuth } from '@samkiel/authsdk/react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { User, Shield, Grid, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+type UserWithAvatar = NonNullable<ReturnType<typeof useAuth>['user']> & { avatar?: string };
 
 export default function OverviewPage() {
   const { user, isLoading } = useAuth();
   const [greeting, setGreeting] = useState('Good day');
   const [isResending, setIsResending] = useState(false);
+  const avatar = (user as UserWithAvatar | null)?.avatar;
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -30,63 +34,64 @@ export default function OverviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user?.email }),
       });
-      
+
       if (response.ok) {
         toast.success('Verification link sent to your inbox.');
       } else {
         toast.error('Failed to send verification link.');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setIsResending(false);
     }
   };
 
-  const quickActions = [
+  const summaryCards = [
     {
       title: 'Personal Info',
-      description: 'Update your name and email',
+      description: 'Name, email, profile picture',
       href: '/personal-info',
       icon: User,
     },
     {
       title: 'Security',
-      description: 'Change password and manage sessions',
+      description: 'Password and active sessions',
       href: '/security',
       icon: Shield,
     },
     {
-      title: 'Products',
-      description: 'See your connected SAMKIEL products',
+      title: 'Connected Products',
+      description: 'Apps signed in with SAMKIEL ID',
       href: '/products',
       icon: Grid,
+    },
+    {
+      title: 'Recent Activity',
+      description: 'Recent sign-ins and changes',
+      href: '/security',
+      icon: Activity,
+      comingSoon: true,
     },
   ];
 
   if (isLoading) {
     return (
-      <div className="space-y-10">
-        <header className="space-y-3">
-          <Skeleton className="h-10 w-[300px]" />
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-4 w-[150px]" />
-            <Skeleton className="h-5 w-[60px] rounded-full" />
+      <div className="space-y-12">
+        <header className="flex items-center gap-6">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-10 w-72" />
+            <Skeleton className="h-4 w-56" />
           </div>
         </header>
-
-        <div className="grid grid-cols-1 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-5 border-[#1F1F1F]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="w-12 h-12 rounded-lg" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-[120px]" />
-                    <Skeleton className="h-4 w-[180px]" />
-                  </div>
-                </div>
-                <Skeleton className="w-5 h-5" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-56" />
               </div>
             </Card>
           ))}
@@ -96,59 +101,120 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="space-y-10">
-        <header>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            {greeting}, {user?.name || user?.email || 'there'}.
+    <div className="space-y-12">
+      {/* Hero */}
+      <header className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <Avatar src={avatar} name={user?.name} email={user?.email} size="xl" />
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight font-syne">
+            {greeting}, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there'}.
           </h1>
-          <div className="flex items-center gap-3">
-            <span className="text-[#888888] font-medium">{user?.email}</span>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <span className="text-muted font-medium truncate">{user?.email}</span>
             <Badge variant={user?.emailVerified ? 'success' : 'warning'}>
               {user?.emailVerified ? 'Verified' : 'Unverified'}
             </Badge>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {!user?.emailVerified && (
-          <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-yellow-500">
-              <AlertCircle size={20} />
-              <p className="text-sm font-medium">Your email is not verified. Check your inbox.</p>
+      {/* Verification banner */}
+      {!user?.emailVerified && (
+        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3 text-yellow-500">
+            <AlertCircle size={20} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-semibold text-white">Verify your email</p>
+              <p className="text-sm text-muted mt-0.5">
+                We sent a link to <span className="text-white">{user?.email}</span>. Check your inbox to unlock all features.
+              </p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="border-yellow-500/20 text-yellow-500 hover:bg-yellow-500/10"
-              onClick={handleResendVerification}
-              isLoading={isResending}
-            >
-              Resend
-            </Button>
           </div>
-        )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 self-start sm:self-auto shrink-0"
+            onClick={handleResendVerification}
+            isLoading={isResending}
+          >
+            Resend link
+          </Button>
+        </div>
+      )}
 
-        <div className="grid grid-cols-1 gap-4">
-          {quickActions.map((action) => (
-            <Link key={action.href} href={action.href}>
-              <Card className="hover:border-[#E8FF47]/30 hover:bg-[#161616] transition-all group p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-[#0A0A0A] border border-[#1F1F1F] flex items-center justify-center text-[#888888] group-hover:text-[#E8FF47] transition-colors">
-                      <action.icon size={24} />
+      {/* Summary grid */}
+      <section className="space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-white font-syne">Your account</h2>
+          <p className="text-sm text-muted">Manage how SAMKIEL ID represents you across our products.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {summaryCards.map((card) => {
+            const Icon = card.icon;
+            const isComingSoon = card.comingSoon;
+            const inner = (
+              <Card className="h-full hover:border-accent/40 hover:bg-surface/70 transition-all group">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="h-11 w-11 rounded-xl bg-background border border-border flex items-center justify-center text-muted group-hover:text-accent group-hover:border-accent/30 transition-colors">
+                      <Icon size={22} aria-hidden="true" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white mb-0.5">{action.title}</h3>
-                      <p className="text-sm text-[#888888]">{action.description}</p>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-semibold text-white">{card.title}</h3>
+                        {isComingSoon && (
+                          <span className="text-[10px] uppercase tracking-wider text-muted border border-border rounded px-1.5 py-0.5">
+                            Soon
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted">{card.description}</p>
                     </div>
                   </div>
-                  <svg className="w-5 h-5 text-[#1F1F1F] group-hover:text-[#E8FF47] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ArrowRight
+                    size={18}
+                    className="text-border group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 mt-1"
+                    aria-hidden="true"
+                  />
                 </div>
               </Card>
-            </Link>
-          ))}
+            );
+
+            return isComingSoon ? (
+              <div key={card.title} aria-disabled="true" className="opacity-70 cursor-not-allowed">
+                {inner}
+              </div>
+            ) : (
+              <Link key={card.href} href={card.href} className="block">
+                {inner}
+              </Link>
+            );
+          })}
         </div>
-      </div>
+      </section>
+
+      {/* Danger section */}
+      <section className="space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-white font-syne">More options</h2>
+        </div>
+        <Link href="/delete-account" className="block">
+          <Card className="hover:border-red-500/30 hover:bg-red-500/5 transition-all group">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-background border border-border flex items-center justify-center text-red-500 group-hover:border-red-500/30 transition-colors">
+                  <Trash2 size={18} aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-white">Delete account</h3>
+                  <p className="text-sm text-muted">Permanently remove your SAMKIEL ID and all data.</p>
+                </div>
+              </div>
+              <ArrowRight size={18} className="text-border group-hover:text-red-500 transition-colors" aria-hidden="true" />
+            </div>
+          </Card>
+        </Link>
+      </section>
+    </div>
   );
 }
