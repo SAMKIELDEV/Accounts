@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, LogOut } from 'lucide-react';
@@ -12,6 +12,15 @@ export const TopBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const handleLogout = useLogout();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
 
   const toggleMenu = () => setIsOpen((s) => !s);
 
