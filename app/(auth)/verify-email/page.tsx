@@ -72,10 +72,10 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tighter text-[#E8FF47] font-syne mb-2">
+          <h1 className="text-3xl font-bold tracking-tighter text-accent font-syne mb-2">
             SAMKIEL
           </h1>
         </div>
@@ -83,7 +83,7 @@ function VerifyEmailContent() {
         <Card className="p-8 text-center">
           {status === 'loading' && (
             <div className="py-10 space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8FF47] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
               <p className="text-white font-medium">Verifying your email...</p>
             </div>
           )}
@@ -97,7 +97,7 @@ function VerifyEmailContent() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">Email verified.</h2>
-                <p className="text-[#888888]">You're all set. You can now access all features.</p>
+                <p className="text-muted">You're all set. You can now access all features.</p>
               </div>
               <Button fullWidth asChild>
                 <Link href="/login">Sign In</Link>
@@ -107,14 +107,14 @@ function VerifyEmailContent() {
 
           {status === 'needs-verification' && (
             <div className="space-y-6">
-              <div className="w-16 h-16 bg-[#E8FF47]/10 border border-[#E8FF47]/20 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-[#E8FF47]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 bg-accent/10 border border-accent/20 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">Please verify your email.</h2>
-                <p className="text-[#888888]">
+                <p className="text-muted">
                   We sent a verification link to <span className="text-white font-medium">{email}</span>. Check your inbox to continue.
                 </p>
               </div>
@@ -124,7 +124,7 @@ function VerifyEmailContent() {
                 </Button>
                 <Link 
                   href="/login" 
-                  className="block text-sm text-[#888888] hover:text-white"
+                  className="block text-sm text-muted hover:text-white"
                 >
                   Back to login
                 </Link>
@@ -141,7 +141,7 @@ function VerifyEmailContent() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">Verification failed.</h2>
-                <p className="text-[#888888]">The link may have expired or is invalid.</p>
+                <p className="text-muted">The link may have expired or is invalid.</p>
               </div>
               <div className="space-y-3">
                 <Button fullWidth onClick={handleResend} isLoading={isResending} variant="ghost">
@@ -149,7 +149,7 @@ function VerifyEmailContent() {
                 </Button>
                 <Link 
                   href="/login" 
-                  className="block text-sm text-[#888888] hover:text-white"
+                  className="block text-sm text-muted hover:text-white"
                 >
                   Back to login
                 </Link>
@@ -166,7 +166,7 @@ function VerifyEmailContent() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">Invalid link.</h2>
-                <p className="text-[#888888]">The verification link is missing or malformed.</p>
+                <p className="text-muted">The verification link is missing or malformed.</p>
               </div>
               <Button fullWidth asChild variant="ghost">
                 <Link href="/login">Back to Sign In</Link>
@@ -182,8 +182,8 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8FF47]"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     }>
       <VerifyEmailContent />

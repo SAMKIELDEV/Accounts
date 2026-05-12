@@ -36,14 +36,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tighter text-[#E8FF47] font-syne mb-2">
+          <h1 className="text-3xl font-bold tracking-tighter text-accent font-syne mb-2">
             SAMKIEL
           </h1>
           <p className="text-2xl font-semibold text-white">Reset your password.</p>
-          <p className="text-[#888888] mt-2">Enter your email and we'll send you a reset link.</p>
+          <p className="text-muted mt-2">Enter your email and we'll send you a reset link.</p>
         </div>
 
         <Card className="p-8">
@@ -69,9 +69,9 @@ export default function ForgotPasswordPage() {
             </form>
           ) : (
             <div className="text-center space-y-6">
-              <div className="p-4 bg-[#E8FF47]/5 border border-[#E8FF47]/20 rounded-lg">
+              <div className="p-4 bg-accent/5 border border-accent/20 rounded-lg">
                 <p className="text-white text-sm">
-                  We've sent a recovery link to <span className="font-medium text-[#E8FF47]">{email}</span>. 
+                  We've sent a recovery link to <span className="font-medium text-accent">{email}</span>. 
                   Please check your inbox.
                 </p>
               </div>
@@ -82,10 +82,10 @@ export default function ForgotPasswordPage() {
           )}
 
           {!submitted && (
-            <div className="mt-8 pt-6 border-t border-[#1F1F1F] text-center">
+            <div className="mt-8 pt-6 border-t border-border text-center">
               <Link 
                 href="/login" 
-                className="text-[#888888] hover:text-white text-sm transition-colors"
+                className="text-muted hover:text-white text-sm transition-colors"
               >
                 Back to login
               </Link>

@@ -50,7 +50,7 @@ export const Footer = () => {
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as const }}
     >
       <div className="relative h-px w-full bg-border">
-        <div className="absolute left-0 top-0 h-full w-40 bg-gradient-to-r from-accent/40 to-transparent" />
+        <div className="absolute left-0 top-0 h-full w-40 bg-linear-to-r from-accent/40 to-transparent" />
       </div>
 
       <div className="mx-auto max-w-[1280px] px-6 pb-12 pt-20 md:px-12 lg:px-20">

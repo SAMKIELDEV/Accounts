@@ -65,10 +65,10 @@ function ResetPasswordContent() {
   if (!token) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tighter text-[#E8FF47] font-syne mb-2">
+          <h1 className="text-3xl font-bold tracking-tighter text-accent font-syne mb-2">
             SAMKIEL
           </h1>
           <p className="text-2xl font-semibold text-white">Set a new password.</p>
@@ -114,8 +114,8 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8FF47]"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     }>
       <ResetPasswordContent />
