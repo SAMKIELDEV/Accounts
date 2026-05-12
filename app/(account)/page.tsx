@@ -101,13 +101,13 @@ export default function OverviewPage() {
   return (
     <div className="space-y-12">
       {/* Hero */}
-      <header className="flex flex-col sm:flex-row sm:items-center gap-6">
+      <header className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left gap-6">
         <Avatar src={user?.avatar} name={user?.name} email={user?.email} size="xl" />
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight font-syne">
             {greeting}, {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there'}.
           </h1>
-          <div className="flex flex-wrap items-center gap-3 mt-2">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-2">
             <span className="text-muted font-medium truncate">{user?.email}</span>
             <Badge variant={user?.emailVerified ? 'success' : 'warning'}>
               {user?.emailVerified ? 'Verified' : 'Unverified'}

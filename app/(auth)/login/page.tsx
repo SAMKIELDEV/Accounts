@@ -68,6 +68,7 @@ function LoginContent() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
@@ -82,13 +83,9 @@ function LoginContent() {
         return;
       }
 
-      // Store tokens in cookies so middleware and SDK can pick them up
-      document.cookie = `sk_access_token=${data.accessToken}; path=/; domain=.samkiel.tech; max-age=900; SameSite=Lax; Secure`;
-      document.cookie = `sk_refresh_token=${data.refreshToken}; path=/; domain=.samkiel.tech; max-age=604800; SameSite=Lax; Secure`;
-
       toast.success('Welcome back!');
-      
-      // Fetch user data into context before redirecting
+
+      // Server already set HttpOnly cookies via Set-Cookie; refresh user context, then redirect.
       await refresh();
       performRedirect(redirect);
     } catch (error: unknown) {

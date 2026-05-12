@@ -18,11 +18,43 @@ interface Session {
   isCurrent?: boolean;
 }
 
+function isMobile(ua: string): boolean {
+  const u = ua.toLowerCase();
+  return u.includes('mobile') || u.includes('android') || u.includes('iphone') || u.includes('ipad');
+}
+
 function getDeviceIcon(deviceInfo: string) {
-  const info = deviceInfo.toLowerCase();
-  if (info.includes('mobile') || info.includes('android') || info.includes('iphone'))
-    return <Smartphone className="w-5 h-5" aria-hidden="true" />;
-  return <Monitor className="w-5 h-5" aria-hidden="true" />;
+  return isMobile(deviceInfo)
+    ? <Smartphone className="w-5 h-5" aria-hidden="true" />
+    : <Monitor className="w-5 h-5" aria-hidden="true" />;
+}
+
+function parseBrowser(ua: string): string {
+  if (/edg\//i.test(ua)) return 'Edge';
+  if (/opr\//i.test(ua) || /opera/i.test(ua)) return 'Opera';
+  if (/chrome/i.test(ua) && !/edg\//i.test(ua)) return 'Chrome';
+  if (/firefox/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua) && !/chrome/i.test(ua)) return 'Safari';
+  return 'Browser';
+}
+
+function parseOS(ua: string): string {
+  if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  if (/android/i.test(ua)) return 'Android';
+  if (/mac os x|macintosh/i.test(ua)) return 'macOS';
+  if (/windows/i.test(ua)) return 'Windows';
+  if (/linux/i.test(ua)) return 'Linux';
+  return 'device';
+}
+
+function formatDevice(ua: string | undefined): string {
+  if (!ua) return 'Unknown device';
+  return `${parseBrowser(ua)} on ${parseOS(ua)}`;
+}
+
+function formatIP(ip?: string): string {
+  if (!ip || ip === 'unknown' || ip === '::1' || ip === '127.0.0.1') return 'Local network';
+  return ip;
 }
 
 function formatDate(dateString: string) {
@@ -217,7 +249,7 @@ export default function SecurityPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-white truncate">
-                          {session.deviceInfo || 'Unknown device'}
+                          {formatDevice(session.deviceInfo)}
                         </span>
                         {session.isCurrent && (
                           <span className="text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full font-semibold border border-green-500/20">
@@ -225,8 +257,8 @@ export default function SecurityPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted flex items-center gap-2 mt-0.5">
-                        <span>{session.ipAddress || 'Unknown IP'}</span>
+                      <p className="text-sm text-muted flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span>{formatIP(session.ipAddress)}</span>
                         <span className="w-1 h-1 rounded-full bg-border" />
                         <span>Last active {formatDate(session.lastActiveAt)}</span>
                       </p>
@@ -237,7 +269,7 @@ export default function SecurityPage() {
                     size="sm"
                     className="text-red-500 hover:text-red-400 hover:bg-red-500/10 shrink-0"
                     onClick={() => handleRevokeSession(session.id)}
-                    aria-label={`Revoke session on ${session.deviceInfo || 'unknown device'}`}
+                    aria-label={`Revoke session on ${formatDevice(session.deviceInfo)}`}
                   >
                     <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
                     Revoke

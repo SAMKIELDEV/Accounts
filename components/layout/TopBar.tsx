@@ -26,8 +26,8 @@ export const TopBar = () => {
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-50 px-6 flex items-center justify-between">
-      <Link href="/" className="text-xl font-bold tracking-tighter text-accent font-syne">
-        SAMKIEL
+      <Link href="/" className="text-xl font-bold tracking-tighter text-white font-syne">
+        SAMKIEL <span className="text-accent">ID</span>
       </Link>
 
       <button

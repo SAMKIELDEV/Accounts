@@ -19,8 +19,8 @@ export const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-65 bg-background border-r border-border flex-col hidden lg:flex">
       <div className="p-8">
-        <Link href="/" className="text-2xl font-bold tracking-tighter text-accent font-syne">
-          SAMKIEL ID
+        <Link href="/" className="text-2xl font-bold tracking-tighter text-white font-syne">
+          SAMKIEL <span className="text-accent">ID</span>
         </Link>
       </div>
 

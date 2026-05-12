@@ -211,18 +211,14 @@ export default function PersonalInfoPage() {
               {user?.emailVerified ? 'Email verified' : 'Email unverified'}
             </Badge>
           </div>
-          <div className="pt-4 border-t border-border space-y-2 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted">Role</span>
-              <span className="text-white capitalize">{user?.role || 'user'}</span>
-            </div>
-            {formatJoinDate(user?.createdAt) && (
+          {formatJoinDate(user?.createdAt) && (
+            <div className="pt-4 border-t border-border space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted">Member since</span>
                 <span className="text-white">{formatJoinDate(user?.createdAt)}</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </Card>
 
         {/* RIGHT: edit forms */}
