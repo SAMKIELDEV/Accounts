@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { AUTH_URL } from '@/lib/auth';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -18,19 +18,19 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${AUTH_URL}/auth/forgot-password`, {
+      await fetch(`${AUTH_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ identifier }),
       });
 
-      // Always show success message regardless of response status per prompt
+      // Always show the generic success message regardless of response status.
       setSubmitted(true);
-      toast.success('If this email exists, a reset link has been sent.');
+      toast.success('If an account matches, a reset link has been sent.');
     } catch (error) {
-      // Even on network error, we follow the pattern of showing the standard message
+      // Even on network error, follow the same generic-message pattern.
       setSubmitted(true);
-      toast.success('If this email exists, a reset link has been sent.');
+      toast.success('If an account matches, a reset link has been sent.');
     } finally {
       setIsLoading(false);
     }
@@ -44,20 +44,23 @@ export default function ForgotPasswordPage() {
             SAMKIEL
           </h1>
           <p className="text-2xl font-semibold text-white">Reset your password.</p>
-          <p className="text-muted mt-2">Enter your email and we'll send you a reset link.</p>
+          <p className="text-muted mt-2">Enter your email, username, or SAMKIEL ID and we'll send a reset link to your email.</p>
         </div>
 
         <Card className="p-8">
           {!submitted ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               <Input
-                label="Email Address"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="Email, Username, or SAMKIEL ID"
+                type="text"
+                placeholder="e.g. ezekiel, SKL-A4X9K2, or you@email.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
                 disabled={isLoading}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
 
               <Button 
@@ -72,7 +75,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center space-y-6">
               <div className="p-4 bg-accent/5 border border-accent/20 rounded-lg">
                 <p className="text-white text-sm">
-                  We've sent a recovery link to <span className="font-medium text-accent">{email}</span>. 
+                  If an account matches, we've sent a recovery link to its email address.
                   Please check your inbox.
                 </p>
               </div>
