@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
+import { SessionRefresher } from '@/components/SessionRefresher';
 
 export default function AccountLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
+      <SessionRefresher />
       <Sidebar />
       <TopBar />
       <main className="lg:ml-65 pt-16 lg:pt-0">
