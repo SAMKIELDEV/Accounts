@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
               <Input
                 label="Email, Username, or SAMKIEL ID"
                 type="text"
-                placeholder="e.g. ezekiel, SKL-A4X9K2, or you@email.com"
+                placeholder="e.g. musa, SKL-A4X9K2, or you@email.com"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required

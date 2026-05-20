@@ -270,7 +270,7 @@ export default function PersonalInfoPage() {
                   label="New username"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value.toLowerCase())}
-                  placeholder="ezekiel_dev"
+                  placeholder="musa_dev"
                   required
                   disabled={isSavingUsername}
                   hint="3-20 characters. Letters, numbers, and underscores only."

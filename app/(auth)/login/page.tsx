@@ -124,7 +124,7 @@ function LoginContent() {
             <Input
               label="Email, Username, or SAMKIEL ID"
               type="text"
-              placeholder="e.g. ezekiel, SKL-A4X9K2, or you@email.com"
+              placeholder="e.g. musa, SKL-A4X9K2, or you@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

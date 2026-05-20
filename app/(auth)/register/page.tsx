@@ -152,7 +152,7 @@ function RegisterContent() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted select-none pointer-events-none">@</span>
                 <input
                   type="text"
-                  placeholder="e.g. ezekiel_dev"
+                  placeholder="e.g. musa_dev"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   required
