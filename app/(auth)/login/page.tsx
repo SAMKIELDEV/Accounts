@@ -20,17 +20,25 @@ function LoginContent() {
   // and the proxy's root-protection branch). Prefer `redirect` for backward compat.
   const redirect = searchParams.get('redirect') ?? searchParams.get('callbackUrl');
 
-  // Helper to handle redirection safely
+  // Helper to handle redirection safely.
+  //
+  // Uses a hard navigation (window.location) rather than router.push: right
+  // after login we mirror the auth tokens into first-party cookies, and the
+  // destination is gated by the proxy middleware. A client-side router.push can
+  // replay a cached *unauthenticated* RSC payload (and may not carry the
+  // freshly-set cookie through the proxy), which intermittently bounced users
+  // back to /login. A full navigation guarantees the cookie is sent and the
+  // proxy re-evaluates auth from scratch.
   const performRedirect = useCallback((targetUrl: string | null) => {
     if (!targetUrl) {
-      router.push('/');
+      window.location.href = '/';
       return;
     }
 
     // Internal path on this accounts site — handle BEFORE URL parsing so
     // values like "/" don't get mangled into "https:///".
     if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
-      router.push(targetUrl);
+      window.location.href = targetUrl;
       return;
     }
 
@@ -51,8 +59,8 @@ function LoginContent() {
     }
 
     // Default fallback
-    router.push('/');
-  }, [router]);
+    window.location.href = '/';
+  }, []);
 
   useEffect(() => {
     if (user && !authLoading) {
