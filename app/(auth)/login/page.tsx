@@ -114,13 +114,16 @@ function LoginContent() {
         <Card className="p-8 bg-surface/50 backdrop-blur-xl border-border shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
-              label="Email Address"
-              type="email"
-              placeholder="name@example.com"
+              label="Email, Username, or SAMKIEL ID"
+              type="text"
+              placeholder="e.g. ezekiel, SKL-A4X9K2, or you@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               className="bg-background/50"
             />
             <div className="space-y-1.5">
