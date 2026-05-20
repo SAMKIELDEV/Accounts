@@ -102,6 +102,13 @@ function RegisterContent() {
     try {
       await register(name, email, password, username);
       toast.success('Account created. Check your email to verify.');
+      // Registration doesn't sign the user in, so send them to the login page
+      // (with a confirmation flag) rather than leaving them stuck on this form.
+      router.push(
+        redirect
+          ? `/login?registered=true&redirect=${encodeURIComponent(redirect)}`
+          : '/login?registered=true',
+      );
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.toLowerCase().includes('username')) {

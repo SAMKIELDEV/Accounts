@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -22,26 +22,53 @@ function formatDate(dateString?: string) {
 }
 
 export default function ProductsPage() {
-  const { getConnectedProducts } = useAuth();
+  const { getConnectedProducts, disconnectProduct } = useAuth();
   const [products, setProducts] = useState<ConnectedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [revokingSlug, setRevokingSlug] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await getConnectedProducts();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      return null;
+    }
+  }, [getConnectedProducts]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const data = await getConnectedProducts();
-        if (!cancelled) setProducts(data);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      } finally {
-        if (!cancelled) setIsLoading(false);
+      const data = await load();
+      if (!cancelled) {
+        if (data) setProducts(data);
+        setIsLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [getConnectedProducts]);
+  }, [load]);
+
+  const handleDisconnect = async (product: ConnectedProduct) => {
+    if (!product.slug) return;
+    const confirmed = window.confirm(
+      `Disconnect ${product.name}? It will lose access to your SAMKIEL ID until you open it again.`,
+    );
+    if (!confirmed) return;
+
+    setRevokingSlug(product.slug);
+    try {
+      await disconnectProduct(product.slug);
+      const data = await load();
+      if (data) setProducts(data);
+    } catch (error) {
+      console.error('Failed to disconnect product:', error);
+    } finally {
+      setRevokingSlug(null);
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -78,7 +105,7 @@ export default function ProductsPage() {
             </Card>
           ) : (
             products.map((product) => (
-              <Card key={product.name} className="flex flex-col h-full hover:border-accent/30 transition-colors">
+              <Card key={product.slug ?? product.name} className="flex flex-col h-full hover:border-accent/30 transition-colors">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
@@ -86,7 +113,10 @@ export default function ProductsPage() {
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-lg font-semibold text-white truncate">{product.name}</h3>
-                      <p className="text-xs text-muted">Connected {formatDate(product.connectedAt)}</p>
+                      <p className="text-xs text-muted">
+                        Connected {formatDate(product.connectedAt)}
+                        {product.lastActiveAt && <> &middot; last active {formatDate(product.lastActiveAt)}</>}
+                      </p>
                     </div>
                   </div>
                   <span
@@ -102,30 +132,35 @@ export default function ProductsPage() {
                 {product.description && (
                   <p className="text-sm text-muted leading-relaxed flex-1 mb-6">{product.description}</p>
                 )}
-                <Button
-                  variant="outline"
-                  fullWidth
-                  className="group"
-                  onClick={() => window.open(product.url, '_blank', 'noopener,noreferrer')}
-                  aria-label={`Open ${product.name}`}
-                >
-                  Open {product.name}
-                  <ExternalLink
-                    size={16}
-                    className="ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-                    aria-hidden="true"
-                  />
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    fullWidth
+                    className="group"
+                    onClick={() => window.open(product.url, '_blank', 'noopener,noreferrer')}
+                    aria-label={`Open ${product.name}`}
+                  >
+                    Open {product.name}
+                    <ExternalLink
+                      size={16}
+                      className="ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDisconnect(product)}
+                    disabled={!product.slug || revokingSlug === product.slug}
+                    aria-label={`Disconnect ${product.name}`}
+                    className="text-red-500 hover:text-red-400 hover:border-red-500/30 shrink-0"
+                  >
+                    {revokingSlug === product.slug ? 'Disconnecting…' : 'Disconnect'}
+                  </Button>
+                </div>
               </Card>
             ))
           )}
         </div>
-
-        {!isLoading && products.length > 0 && (
-          <p className="text-sm text-muted text-center pt-4 border-t border-border">
-            Per-product session management coming soon.
-          </p>
-        )}
       </section>
     </div>
   );

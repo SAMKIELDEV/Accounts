@@ -19,6 +19,9 @@ function LoginContent() {
   // Honor both ?redirect=... (legacy) and ?callbackUrl=... (used by samkielMiddleware
   // and the proxy's root-protection branch). Prefer `redirect` for backward compat.
   const redirect = searchParams.get('redirect') ?? searchParams.get('callbackUrl');
+  // One-time arrival notices: ?registered=true after sign-up, ?deleted=true after account deletion.
+  const justRegistered = searchParams.get('registered') === 'true';
+  const justDeleted = searchParams.get('deleted') === 'true';
 
   // Helper to handle redirection safely.
   //
@@ -118,6 +121,17 @@ function LoginContent() {
             Sign in to your SAMKIEL account to continue.
           </p>
         </div>
+
+        {justRegistered && (
+          <div role="status" className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 text-sm text-green-500">
+            Account created. Check your email to verify it, then sign in below.
+          </div>
+        )}
+        {justDeleted && (
+          <div role="status" className="rounded-xl border border-border bg-surface/50 p-4 text-sm text-muted">
+            Your SAMKIEL ID has been permanently deleted.
+          </div>
+        )}
 
         <Card className="p-8 bg-surface/50 backdrop-blur-xl border-border shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
