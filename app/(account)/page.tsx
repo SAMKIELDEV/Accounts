@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { CopyButton } from '@/components/ui/CopyButton';
 import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -138,6 +139,25 @@ export default function OverviewPage() {
           </Button>
         </div>
       )}
+
+      {/* SAMKIEL ID */}
+      <section>
+        <Card className="bg-surface/70">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2 min-w-0">
+              <p className="text-xs uppercase tracking-wider text-muted font-medium">Your SAMKIEL ID</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-mono text-2xl sm:text-3xl font-bold text-accent tracking-wider">
+                  {user?.samkielId ?? '—'}
+                </span>
+                {user?.samkielId && <CopyButton value={user.samkielId} label="Copy SAMKIEL ID" />}
+              </div>
+              <p className="text-sm text-muted">This is your permanent identifier. It never changes.</p>
+              {user?.username && <p className="text-sm text-white font-medium">@{user.username}</p>}
+            </div>
+          </div>
+        </Card>
+      </section>
 
       {/* Summary grid */}
       <section className="space-y-5">

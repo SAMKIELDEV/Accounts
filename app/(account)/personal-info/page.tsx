@@ -2,13 +2,14 @@
 
 import React, { useRef, useState } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
-import { SamkielAuthError } from '@samkiel/authsdk';
+import { SamkielAuthError, UsernameChangeCooldownError } from '@samkiel/authsdk';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { CopyButton } from '@/components/ui/CopyButton';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -21,11 +22,24 @@ function formatJoinDate(iso?: string) {
   }
 }
 
+function formatFullDate(iso?: string) {
+  if (!iso) return 'a later date';
+  try {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  } catch {
+    return 'a later date';
+  }
+}
+
 export default function PersonalInfoPage() {
-  const { user, isLoading: authLoading, updateName, updateEmail, uploadAvatar } = useAuth();
+  const { user, isLoading: authLoading, updateName, updateEmail, uploadAvatar, changeUsername } = useAuth();
 
   const [name, setName] = useState(user?.name ?? '');
   const [isSavingName, setIsSavingName] = useState(false);
+
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
+  const [isSavingUsername, setIsSavingUsername] = useState(false);
 
   const [newEmail, setNewEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -71,6 +85,36 @@ export default function PersonalInfoPage() {
       toast.error(msg);
     } finally {
       setIsSavingName(false);
+    }
+  };
+
+  const startEditUsername = () => {
+    setUsernameInput(user?.username ?? '');
+    setEditingUsername(true);
+  };
+
+  const handleChangeUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = usernameInput.trim().toLowerCase();
+    if (!trimmed || trimmed === user?.username) {
+      setEditingUsername(false);
+      return;
+    }
+
+    setIsSavingUsername(true);
+    try {
+      await changeUsername(trimmed);
+      toast.success('Username updated.');
+      setEditingUsername(false);
+    } catch (err) {
+      if (err instanceof UsernameChangeCooldownError) {
+        toast.error(`You can next change your username on ${formatFullDate(err.nextChangeAt)}.`);
+      } else {
+        const msg = err instanceof Error ? err.message : 'Could not update your username.';
+        toast.error(msg);
+      }
+    } finally {
+      setIsSavingUsername(false);
     }
   };
 
@@ -203,6 +247,72 @@ export default function PersonalInfoPage() {
                 Save name
               </Button>
             </form>
+          </Card>
+
+          {/* Username */}
+          <Card className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white font-syne">Username</h2>
+                <p className="text-sm text-muted mt-0.5">
+                  Your unique handle across SAMKIEL. Changeable once every 23 days.
+                </p>
+              </div>
+              {!editingUsername && (
+                <Button variant="outline" size="sm" className="shrink-0" onClick={startEditUsername}>
+                  Change Username
+                </Button>
+              )}
+            </div>
+            {editingUsername ? (
+              <form onSubmit={handleChangeUsername} className="space-y-5 max-w-md">
+                <Input
+                  label="New username"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value.toLowerCase())}
+                  placeholder="ezekiel_dev"
+                  required
+                  disabled={isSavingUsername}
+                  hint="3-20 characters. Letters, numbers, and underscores only."
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                />
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="submit"
+                    isLoading={isSavingUsername}
+                    disabled={!usernameInput.trim() || usernameInput.trim() === user?.username}
+                  >
+                    Save username
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setEditingUsername(false)}
+                    disabled={isSavingUsername}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-xl font-semibold text-white">@{user?.username ?? '—'}</p>
+            )}
+          </Card>
+
+          {/* SAMKIEL ID */}
+          <Card className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold text-white font-syne">SAMKIEL ID</h2>
+              <p className="text-sm text-muted mt-0.5">Cannot be changed.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-lg font-semibold text-accent tracking-wider">
+                {user?.samkielId ?? '—'}
+              </span>
+              {user?.samkielId && <CopyButton value={user.samkielId} label="Copy SAMKIEL ID" />}
+            </div>
           </Card>
 
           <Card className="space-y-5">

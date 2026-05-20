@@ -5,16 +5,26 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@samkiel/authsdk/react';
 import { toast } from 'sonner';
+import { Check, X, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 function RegisterContent() {
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { register, user, signInWithProvider } = useAuth();
+
+  // Live username validation/availability state.
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [usernameAvailable, setUsernameAvailable] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [suggestion, setSuggestion] = useState('');
+
+  const { register, user, signInWithProvider, checkUsernameAvailability, suggestUsername } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
@@ -25,21 +35,81 @@ function RegisterContent() {
     }
   }, [user, router]);
 
+  // Validate format instantly, then debounce the availability check by 400ms.
+  useEffect(() => {
+    setUsernameAvailable(false);
+    if (!username) {
+      setUsernameError(null);
+      return;
+    }
+    if (/[^a-z0-9_]/.test(username)) {
+      setUsernameError('Letters, numbers, and underscores only.');
+      return;
+    }
+    if (username.length < 3) {
+      setUsernameError('Must be at least 3 characters.');
+      return;
+    }
+    if (username.length > 20) {
+      setUsernameError('Must be 20 characters or fewer.');
+      return;
+    }
+    setUsernameError(null);
+    setCheckingUsername(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const { available, error } = await checkUsernameAvailability(username);
+        setUsernameAvailable(available);
+        setUsernameError(available ? null : error || 'That username is taken.');
+      } catch {
+        // Ignore transient network errors for the live check.
+      } finally {
+        setCheckingUsername(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [username, checkUsernameAvailability]);
+
+  // Suggest a handle from the name (debounced) while the username is untouched.
+  useEffect(() => {
+    if (!name.trim()) {
+      setSuggestion('');
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestUsername(name);
+        setSuggestion(res.suggestion);
+      } catch {
+        // Suggestions are best-effort.
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [name, suggestUsername]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (usernameError || (!usernameAvailable && username.length > 0)) {
+      toast.error('Please choose a valid, available username.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Adjusted to match SDK signature (name, email, password)
-      await register(name, email, password);
+      await register(name, email, password, username);
       toast.success('Account created. Check your email to verify.');
-
     } catch (error: any) {
       const errorMessage = error.message || '';
-      if (errorMessage.includes('409') || errorMessage.includes('exists')) {
+      if (errorMessage.toLowerCase().includes('username')) {
+        toast.error(errorMessage);
+      } else if (errorMessage.includes('409') || errorMessage.toLowerCase().includes('exists')) {
         toast.error('An account with this email already exists.');
       } else {
-        toast.error('We couldn\'t create your account. Please try again.');
+        toast.error("We couldn't create your account. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -74,6 +144,57 @@ function RegisterContent() {
               disabled={isLoading}
               className="bg-background/50"
             />
+
+            {/* Username — lowercase, @ prefix (UI only), live availability check */}
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="text-sm font-medium text-text">Username</label>
+              <div className="relative group">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted select-none pointer-events-none">@</span>
+                <input
+                  type="text"
+                  placeholder="e.g. ezekiel_dev"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                  required
+                  disabled={isLoading}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  aria-invalid={usernameError ? 'true' : 'false'}
+                  className={cn(
+                    'flex h-11 w-full rounded-lg border border-border bg-background/50 pl-8 pr-11 py-2 text-base text-white placeholder:text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+                    usernameError && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+                    usernameAvailable && 'border-green-500 focus:border-green-500 focus:ring-green-500',
+                  )}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {checkingUsername ? (
+                    <Loader2 size={18} className="animate-spin text-muted" aria-label="Checking" />
+                  ) : usernameAvailable ? (
+                    <Check size={18} className="text-green-500" aria-label="Available" />
+                  ) : usernameError ? (
+                    <X size={18} className="text-red-500" aria-label="Unavailable" />
+                  ) : null}
+                </span>
+              </div>
+              {usernameError ? (
+                <span className="text-xs text-red-500">{usernameError}</span>
+              ) : (
+                <span className="text-xs text-muted">
+                  3-20 characters. Letters, numbers, and underscores only.
+                </span>
+              )}
+              {suggestion && !username && (
+                <button
+                  type="button"
+                  onClick={() => setUsername(suggestion)}
+                  className="text-xs text-accent hover:underline self-start"
+                >
+                  Suggestion: @{suggestion}
+                </button>
+              )}
+            </div>
+
             <Input
               label="Email Address"
               type="email"
@@ -96,9 +217,9 @@ function RegisterContent() {
               className="bg-background/50"
             />
 
-            <Button 
-              type="submit" 
-              fullWidth 
+            <Button
+              type="submit"
+              fullWidth
               isLoading={isLoading}
               className="h-12 text-base font-bold hover:brightness-110 transition-all duration-300 mt-2"
             >
@@ -134,8 +255,8 @@ function RegisterContent() {
           <div className="mt-10 pt-8 border-t border-border text-center">
             <p className="text-muted text-sm">
               Already have an account?{' '}
-              <Link 
-                href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"} 
+              <Link
+                href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
                 className="text-accent hover:underline font-bold transition-all"
               >
                 Sign in
