@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { AUTH_URL } from '@/lib/auth';
 
 function ResetPasswordContent() {
   const [password, setPassword] = useState('');
@@ -38,7 +39,7 @@ function ResetPasswordContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/reset-password`, {
+      const response = await fetch(`${AUTH_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword: password }),

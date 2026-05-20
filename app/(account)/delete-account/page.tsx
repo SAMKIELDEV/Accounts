@@ -21,7 +21,8 @@ export default function DeleteAccountPage() {
     try {
       await deleteAccount(password);
       toast.success('Account deleted.');
-      window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/login?deleted=true`;
+      // The login page lives on this (account) app, not the API host.
+      window.location.href = `/login?deleted=true`;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '';
       const status = (error as { status?: number } | null)?.status;

@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { AUTH_URL } from '@/lib/auth';
 
 type VerifyStatus = 'loading' | 'success' | 'error' | 'needs-verification' | 'invalid';
 
@@ -25,7 +26,7 @@ function VerifyEmailContent() {
     if (!token) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/verify-email`, {
+      const response = await fetch(`${AUTH_URL}/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
@@ -52,7 +53,7 @@ function VerifyEmailContent() {
     
     setIsResending(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/resend-verification`, {
+      const response = await fetch(`${AUTH_URL}/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

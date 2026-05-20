@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { CopyButton } from '@/components/ui/CopyButton';
+import { AUTH_URL } from '@/lib/auth';
 import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,7 +28,7 @@ export default function OverviewPage() {
   const handleResendVerification = async () => {
     setIsResending(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/resend-verification`, {
+      const response = await fetch(`${AUTH_URL}/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user?.email }),

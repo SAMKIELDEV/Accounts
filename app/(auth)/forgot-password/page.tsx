@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { AUTH_URL } from '@/lib/auth';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -17,7 +18,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/auth/forgot-password`, {
+      const response = await fetch(`${AUTH_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
