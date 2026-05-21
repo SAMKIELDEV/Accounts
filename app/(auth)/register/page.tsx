@@ -17,6 +17,7 @@ function RegisterContent() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Live username validation/availability state.
@@ -98,6 +99,11 @@ function RegisterContent() {
 
     if (usernameError || (!usernameAvailable && username.length > 0)) {
       toast.error('Please choose a valid, available username.');
+      return;
+    }
+
+    if (!agreed) {
+      toast.error('Please agree to the Terms and Privacy Policy to continue.');
       return;
     }
 
@@ -242,10 +248,43 @@ function RegisterContent() {
               className="bg-background/50"
             />
 
+            <label className="flex items-start gap-3 text-sm text-muted cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                disabled={isLoading}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-background/50 accent-accent cursor-pointer"
+                aria-label="Agree to the Terms of Service and Privacy Policy"
+              />
+              <span>
+                I agree to the{' '}
+                <a
+                  href="https://samkiel.tech/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline font-medium"
+                >
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a
+                  href="https://samkiel.tech/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline font-medium"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </span>
+            </label>
+
             <Button
               type="submit"
               fullWidth
               isLoading={isLoading}
+              disabled={!agreed}
               className="h-12 text-base font-bold hover:brightness-110 transition-all duration-300 mt-2"
             >
               Create Account
@@ -266,7 +305,13 @@ function RegisterContent() {
               <Button
                 variant="outline"
                 fullWidth
-                onClick={() => signInWithProvider('google', redirect || undefined)}
+                onClick={() => {
+                  if (!agreed) {
+                    toast.error('Please agree to the Terms and Privacy Policy to continue.');
+                    return;
+                  }
+                  signInWithProvider('google', redirect || undefined);
+                }}
                 className="h-12 bg-transparent border-border text-white hover:bg-white/5 transition-all duration-300 gap-3"
               >
                 <svg className="h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
