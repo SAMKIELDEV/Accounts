@@ -119,13 +119,9 @@ Shows which SAMKIEL products the user has an active session on.
 
 **Display per product:**
 - Product name + logo/icon
-- Subdomain (e.g. `breezrchat.samkiel.tech`)
+- Subdomain (e.g. `kiv.samkiel.tech`)
 - Last active timestamp
 - "Sign out of this product" button (revokes that product's session)
-
-**Initial product list (hardcoded for now, dynamic later):**
-- BreezrChat — `breezrchat.samkiel.tech`
-- SKDL — `skdl.samkiel.tech`
 
 **Implementation note:** Sessions in the `Session` model should store a `product` or `origin` field so they can be filtered by product. If not present, add it to the auth server.
 

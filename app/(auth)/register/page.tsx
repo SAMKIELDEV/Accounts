@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 function RegisterContent() {
-  const [name, setName] = useState('');
+  const [fname, setFname] = useState('');
+  const [lname, setLname] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +29,9 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
+
+  // Combined name used to seed username suggestions.
+  const fullName = `${fname} ${lname}`.trim();
 
   useEffect(() => {
     if (user) {
@@ -74,20 +78,20 @@ function RegisterContent() {
 
   // Suggest a handle from the name (debounced) while the username is untouched.
   useEffect(() => {
-    if (!name.trim()) {
+    if (!fullName) {
       setSuggestion('');
       return;
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await suggestUsername(name);
+        const res = await suggestUsername(fullName);
         setSuggestion(res.suggestion);
       } catch {
         // Suggestions are best-effort.
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [name, suggestUsername]);
+  }, [fullName, suggestUsername]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +104,7 @@ function RegisterContent() {
     setIsLoading(true);
 
     try {
-      await register(name, email, password, username);
+      await register({ fname: fname.trim(), lname: lname.trim(), email, password, username });
       toast.success('Account created. Check your email to verify.');
       // Registration doesn't sign the user in, so send them to the login page
       // (with a confirmation flag) rather than leaving them stuck on this form.
@@ -141,16 +145,30 @@ function RegisterContent() {
 
         <Card className="p-8 bg-surface/50 backdrop-blur-xl border-border shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Input
-              label="Full Name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              disabled={isLoading}
-              className="bg-background/50"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="First Name"
+                type="text"
+                placeholder="John"
+                value={fname}
+                onChange={(e) => setFname(e.target.value)}
+                required
+                disabled={isLoading}
+                autoComplete="given-name"
+                className="bg-background/50"
+              />
+              <Input
+                label="Last Name"
+                type="text"
+                placeholder="Doe"
+                value={lname}
+                onChange={(e) => setLname(e.target.value)}
+                required
+                disabled={isLoading}
+                autoComplete="family-name"
+                className="bg-background/50"
+              />
+            </div>
 
             {/* Username — lowercase, @ prefix (UI only), live availability check */}
             <div className="flex flex-col gap-1.5 w-full">

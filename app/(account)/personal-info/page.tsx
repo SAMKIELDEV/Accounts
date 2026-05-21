@@ -32,9 +32,16 @@ function formatFullDate(iso?: string) {
 }
 
 export default function PersonalInfoPage() {
-  const { user, isLoading: authLoading, updateName, updateEmail, uploadAvatar, changeUsername } = useAuth();
+  const { user, isLoading: authLoading, updateFullName, updateEmail, uploadAvatar, changeUsername } = useAuth();
 
-  const [name, setName] = useState(user?.name ?? '');
+  // Current first/last name, falling back to splitting `name` for legacy users
+  // whose fname/lname haven't been backfilled yet (they backfill on next login).
+  const currentFname = user?.fname ?? (user?.name ? user.name.trim().split(/\s+/)[0] : '');
+  const currentLname = user?.lname ?? (user?.name ? user.name.trim().split(/\s+/).slice(1).join(' ') : '');
+
+  const [fname, setFname] = useState('');
+  const [lname, setLname] = useState('');
+  const nameHydrated = useRef(false);
   const [isSavingName, setIsSavingName] = useState(false);
 
   const [editingUsername, setEditingUsername] = useState(false);
@@ -48,10 +55,15 @@ export default function PersonalInfoPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync local name state when user loads
+  // Hydrate the name fields once when the user first loads; leave them alone
+  // afterwards so the user can freely edit (including clearing the last name).
   React.useEffect(() => {
-    if (user?.name && !name) setName(user.name);
-  }, [user?.name, name]);
+    if (!nameHydrated.current && user) {
+      setFname(currentFname);
+      setLname(currentLname);
+      nameHydrated.current = true;
+    }
+  }, [user, currentFname, currentLname]);
 
   if (authLoading) {
     return (
@@ -71,14 +83,17 @@ export default function PersonalInfoPage() {
     );
   }
 
+  const trimmedFname = fname.trim();
+  const trimmedLname = lname.trim();
+  const nameUnchanged = trimmedFname === currentFname && trimmedLname === currentLname;
+
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = name.trim();
-    if (!trimmed || trimmed === user?.name) return;
+    if (!trimmedFname || nameUnchanged) return;
 
     setIsSavingName(true);
     try {
-      await updateName(trimmed);
+      await updateFullName(trimmedFname, trimmedLname);
       toast.success('Name updated.');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not update your name.';
@@ -231,18 +246,29 @@ export default function PersonalInfoPage() {
               <p className="text-sm text-muted mt-0.5">How your name appears across SAMKIEL products.</p>
             </div>
             <form onSubmit={handleUpdateName} className="space-y-5 max-w-md">
-              <Input
-                label="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                required
-                disabled={isSavingName}
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="First name"
+                  value={fname}
+                  onChange={(e) => setFname(e.target.value)}
+                  placeholder="Jane"
+                  required
+                  disabled={isSavingName}
+                  autoComplete="given-name"
+                />
+                <Input
+                  label="Last name"
+                  value={lname}
+                  onChange={(e) => setLname(e.target.value)}
+                  placeholder="Doe"
+                  disabled={isSavingName}
+                  autoComplete="family-name"
+                />
+              </div>
               <Button
                 type="submit"
                 isLoading={isSavingName}
-                disabled={!name.trim() || name.trim() === user?.name}
+                disabled={!trimmedFname || nameUnchanged}
               >
                 Save name
               </Button>
