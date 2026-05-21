@@ -21,6 +21,19 @@ function formatDate(dateString?: string) {
   return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+// Date *and* time — used for "last active", which the user reads as the exact
+// moment they last used the product, not just the day.
+function formatDateTime(dateString?: string) {
+  if (!dateString) return 'Not available';
+  return new Date(dateString).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function ProductsPage() {
   const { getConnectedProducts, disconnectProduct } = useAuth();
   const [products, setProducts] = useState<ConnectedProduct[]>([]);
@@ -115,7 +128,7 @@ export default function ProductsPage() {
                       <h3 className="text-lg font-semibold text-white truncate">{product.name}</h3>
                       <p className="text-xs text-muted">
                         Connected {formatDate(product.connectedAt)}
-                        {product.lastActiveAt && <> &middot; last active {formatDate(product.lastActiveAt)}</>}
+                        {product.lastActiveAt && <> &middot; last active {formatDateTime(product.lastActiveAt)}</>}
                       </p>
                     </div>
                   </div>
