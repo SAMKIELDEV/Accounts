@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 function formatJoinDate(iso?: string) {
   if (!iso) return null;
   try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   } catch {
     return null;
   }
