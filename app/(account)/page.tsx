@@ -12,6 +12,7 @@ import { CopyButton } from '@/components/ui/CopyButton';
 import { AUTH_URL } from '@/lib/auth';
 import { User, Shield, Grid, Activity, AlertCircle, ArrowRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { currentHourInLagos } from '@/lib/datetime';
 
 export default function OverviewPage() {
   const { user, isLoading } = useAuth();
@@ -19,7 +20,7 @@ export default function OverviewPage() {
   const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
-    const hour = new Date().getHours();
+    const hour = currentHourInLagos();
     if (hour < 12) setGreeting('Good morning');
     else if (hour < 18) setGreeting('Good afternoon');
     else setGreeting('Good evening');

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ExternalLink, Globe } from 'lucide-react';
 import { ConnectedProduct } from '@samkiel/authsdk';
+import { formatDate as fmtDate, formatDateTime as fmtDateTime } from '@/lib/datetime';
 
 const productIcons: Record<string, React.ReactNode> = {
   Kiv: (
@@ -17,21 +18,13 @@ const productIcons: Record<string, React.ReactNode> = {
 };
 
 function formatDate(dateString?: string) {
-  if (!dateString) return 'Not available';
-  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return dateString ? fmtDate(dateString) : 'Not available';
 }
 
 // Date *and* time — used for "last active", which the user reads as the exact
 // moment they last used the product, not just the day.
 function formatDateTime(dateString?: string) {
-  if (!dateString) return 'Not available';
-  return new Date(dateString).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return dateString ? fmtDateTime(dateString) : 'Not available';
 }
 
 export default function ProductsPage() {

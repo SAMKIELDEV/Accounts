@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import { Monitor, Smartphone, Globe, Trash2 } from 'lucide-react';
+import { formatDateTime } from '@/lib/datetime';
 
 interface Session {
   id: string;
@@ -58,13 +59,7 @@ function formatIP(ip?: string): string {
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDateTime(dateString);
 }
 
 export default function SecurityPage() {

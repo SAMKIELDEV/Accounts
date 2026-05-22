@@ -12,23 +12,14 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDate } from '@/lib/datetime';
 
 function formatJoinDate(iso?: string) {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  } catch {
-    return null;
-  }
+  return iso ? formatDate(iso) : null;
 }
 
 function formatFullDate(iso?: string) {
-  if (!iso) return 'a later date';
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  } catch {
-    return 'a later date';
-  }
+  return iso ? formatDate(iso) : 'a later date';
 }
 
 export default function PersonalInfoPage() {
