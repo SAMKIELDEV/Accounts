@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
 import { SamkielAuthError, UsernameChangeCooldownError } from '@samkiel/authsdk';
 import { Card } from '@/components/ui/Card';
@@ -13,6 +13,26 @@ import { CopyButton } from '@/components/ui/CopyButton';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/datetime';
+import { AUTH_URL } from '@/lib/auth';
+import Link from 'next/link';
+
+// Simple cookie helper to read sk_access_token from browser
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+const localeNames: Record<string, string> = {
+  'en': 'English (US)',
+  'en-GB': 'English (UK)',
+  'fr': 'Français (French)',
+  'de': 'Deutsch (German)',
+  'es': 'Español (Spanish)',
+  'pt': 'Português (Portuguese)',
+};
 
 function formatJoinDate(iso?: string) {
   return iso ? formatDate(iso) : null;
@@ -22,11 +42,17 @@ function formatFullDate(iso?: string) {
   return iso ? formatDate(iso) : 'a later date';
 }
 
+function formatPasswordChangedAt(dateStr?: string) {
+  if (!dateStr) return 'Never changed';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 'Never changed';
+  return `Last changed ${d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+}
+
 export default function PersonalInfoPage() {
-  const { user, isLoading: authLoading, updateFullName, updateEmail, uploadAvatar, changeUsername } = useAuth();
+  const { user, isLoading: authLoading, updateFullName, updateEmail, uploadAvatar, changeUsername, refresh } = useAuth();
 
   // Current first/last name, falling back to splitting `name` for legacy users
-  // whose fname/lname haven't been backfilled yet (they backfill on next login).
   const currentFname = user?.fname ?? (user?.name ? user.name.trim().split(/\s+/)[0] : '');
   const currentLname = user?.lname ?? (user?.name ? user.name.trim().split(/\s+/).slice(1).join(' ') : '');
 
@@ -46,13 +72,27 @@ export default function PersonalInfoPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Hydrate the name fields once when the user first loads; leave them alone
-  // afterwards so the user can freely edit (including clearing the last name).
-  React.useEffect(() => {
-    if (!nameHydrated.current && user) {
-      setFname(currentFname);
-      setLname(currentLname);
-      nameHydrated.current = true;
+  // New Fields States
+  const [phone, setPhone] = useState('');
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+
+  const [birthday, setBirthday] = useState('');
+  const [isSavingBirthday, setIsSavingBirthday] = useState(false);
+
+  const [locale, setLocale] = useState('en');
+  const [isSavingLocale, setIsSavingLocale] = useState(false);
+
+  // Hydrate name fields and new fields once when user first loads
+  useEffect(() => {
+    if (user) {
+      if (!nameHydrated.current) {
+        setFname(currentFname);
+        setLname(currentLname);
+        nameHydrated.current = true;
+      }
+      setPhone(user.phone || '');
+      setBirthday(user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : '');
+      setLocale(user.locale || 'en');
     }
   }, [user, currentFname, currentLname]);
 
@@ -86,6 +126,7 @@ export default function PersonalInfoPage() {
     try {
       await updateFullName(trimmedFname, trimmedLname);
       toast.success('Name updated.');
+      await refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not update your name.';
       toast.error(msg);
@@ -112,6 +153,7 @@ export default function PersonalInfoPage() {
       await changeUsername(trimmed);
       toast.success('Username updated.');
       setEditingUsername(false);
+      await refresh();
     } catch (err) {
       if (err instanceof UsernameChangeCooldownError) {
         toast.error(`You can next change your username on ${formatFullDate(err.nextChangeAt)}.`);
@@ -134,6 +176,7 @@ export default function PersonalInfoPage() {
       toast.success('Verification email sent to your new address.');
       setNewEmail('');
       setCurrentPassword('');
+      await refresh();
     } catch (err) {
       const status = err instanceof SamkielAuthError ? err.status : undefined;
       if (status === 401) {
@@ -166,6 +209,7 @@ export default function PersonalInfoPage() {
     try {
       await uploadAvatar(file);
       toast.success('Profile picture updated.');
+      await refresh();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not upload your photo.';
       toast.error(msg);
@@ -173,6 +217,75 @@ export default function PersonalInfoPage() {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  // Profile PATCH trigger
+  const handleUpdateProfileField = async (fields: Record<string, any>, successMsg: string, setSaving: React.Dispatch<React.SetStateAction<boolean>>) => {
+    setSaving(true);
+    const token = getCookie('sk_access_token');
+    try {
+      const response = await fetch(`${AUTH_URL}/user/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(fields),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update profile.');
+      }
+
+      toast.success(successMsg);
+      await refresh();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Phone PATCH trigger
+  const handleUpdatePhone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingPhone(true);
+    const token = getCookie('sk_access_token');
+    try {
+      const response = await fetch(`${AUTH_URL}/user/phone`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update phone.');
+      }
+
+      toast.success('Phone number updated.');
+      await refresh();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
+      toast.error(msg);
+    } finally {
+      setIsSavingPhone(false);
+    }
+  };
+
+  const handleUpdateBirthday = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleUpdateProfileField({ birthday: birthday || null }, 'Birthday updated.', setIsSavingBirthday);
+  };
+
+  const handleUpdateLocale = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleUpdateProfileField({ locale }, 'Language preference updated.', setIsSavingLocale);
   };
 
   return (
@@ -231,6 +344,7 @@ export default function PersonalInfoPage() {
 
         {/* RIGHT: edit forms */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Display Name */}
           <Card className="space-y-5">
             <div>
               <h2 className="text-lg font-semibold text-white font-syne">Display name</h2>
@@ -332,6 +446,7 @@ export default function PersonalInfoPage() {
             </div>
           </Card>
 
+          {/* Email address */}
           <Card className="space-y-5">
             <div>
               <h2 className="text-lg font-semibold text-white font-syne">Email address</h2>
@@ -369,6 +484,111 @@ export default function PersonalInfoPage() {
                 Send verification
               </Button>
             </form>
+          </Card>
+
+          {/* Phone */}
+          <Card className="space-y-5">
+            <div>
+              <h2 className="text-lg font-semibold text-white font-syne flex items-center gap-2">
+                <span>Phone number</span>
+                {user?.phone ? (
+                  <Badge variant={user.phoneVerified ? 'success' : 'warning'}>
+                    {user.phoneVerified ? 'Verified' : 'Unverified'}
+                  </Badge>
+                ) : null}
+              </h2>
+              <p className="text-sm text-muted mt-0.5">Your phone number for ecosystem notifications.</p>
+            </div>
+            <form onSubmit={handleUpdatePhone} className="space-y-5 max-w-md">
+              <Input
+                label="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1234567890"
+                required
+                disabled={isSavingPhone}
+                hint="E.164 format: +[country code][number], 8-15 digits"
+              />
+              <Button
+                type="submit"
+                isLoading={isSavingPhone}
+                disabled={phone === (user?.phone || '')}
+              >
+                Save phone
+              </Button>
+            </form>
+          </Card>
+
+          {/* Birthday */}
+          <Card className="space-y-5">
+            <div>
+              <h2 className="text-lg font-semibold text-white font-syne">Birthday</h2>
+              <p className="text-sm text-muted mt-0.5">Info about your birth date.</p>
+            </div>
+            <form onSubmit={handleUpdateBirthday} className="space-y-5 max-w-md">
+              <Input
+                label="Birthday"
+                type="date"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                disabled={isSavingBirthday}
+              />
+              <Button
+                type="submit"
+                isLoading={isSavingBirthday}
+                disabled={birthday === (user?.birthday ? new Date(user.birthday).toISOString().split('T')[0] : '')}
+              >
+                Save birthday
+              </Button>
+            </form>
+          </Card>
+
+          {/* Language selection */}
+          <Card className="space-y-5">
+            <div>
+              <h2 className="text-lg font-semibold text-white font-syne">Language preference</h2>
+              <p className="text-sm text-muted mt-0.5">Your preferred language for interface and alerts.</p>
+            </div>
+            <form onSubmit={handleUpdateLocale} className="space-y-5 max-w-md">
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-sm font-medium text-text">Preferred Language</label>
+                <select
+                  value={locale}
+                  onChange={(e) => setLocale(e.target.value)}
+                  disabled={isSavingLocale}
+                  className="flex h-11 w-full rounded-lg border border-border bg-surface px-4 py-2 text-base text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {Object.entries(localeNames).map(([code, name]) => (
+                    <option key={code} value={code} className="bg-surface text-white">{name}</option>
+                  ))}
+                </select>
+              </div>
+              <Button
+                type="submit"
+                className="mt-2"
+                isLoading={isSavingLocale}
+                disabled={locale === (user?.locale || 'en')}
+              >
+                Save language
+              </Button>
+            </form>
+          </Card>
+
+          {/* Password changed metadata */}
+          <Card className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white font-syne">Password security</h2>
+                <p className="text-sm text-muted mt-0.5">
+                  {formatPasswordChangedAt(user?.passwordChangedAt)}
+                </p>
+              </div>
+              <Link href="/security">
+                <Button variant="outline" size="sm">
+                  Change password
+                </Button>
+              </Link>
+            </div>
           </Card>
         </div>
       </div>

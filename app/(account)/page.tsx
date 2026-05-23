@@ -168,7 +168,29 @@ export default function OverviewPage() {
           <p className="text-sm text-muted">Manage how SAMKIEL ID represents you across our products.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {summaryCards.map((card) => {
+          {/* Custom Personal Info Summary Card */}
+          <Link href="/personal-info" className="block">
+            <Card className="h-full hover:border-accent/40 hover:bg-surface/70 transition-all group flex flex-col justify-between">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-accent text-black flex items-center justify-center font-bold font-syne text-lg uppercase shrink-0 select-none">
+                  {user?.name ? user.name[0] : (user?.email ? user.email[0] : 'U')}
+                </div>
+                <div className="space-y-1 min-w-0">
+                  <h3 className="text-base font-semibold text-white font-syne">Personal Info</h3>
+                  <p className="text-sm text-white font-medium truncate">{user?.name || 'Unnamed user'}</p>
+                  <p className="text-sm text-muted truncate">{user?.email}</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-border/40 flex justify-end">
+                <span className="text-xs font-semibold text-accent flex items-center gap-1 group-hover:underline">
+                  Manage personal info <ArrowRight size={14} />
+                </span>
+              </div>
+            </Card>
+          </Link>
+
+          {/* Map rest of the cards (Security, Products, Activity) */}
+          {summaryCards.slice(1).map((card) => {
             const Icon = card.icon;
             const isComingSoon = card.comingSoon;
             const inner = (
@@ -180,7 +202,7 @@ export default function OverviewPage() {
                     </div>
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-semibold text-white">{card.title}</h3>
+                        <h3 className="text-base font-semibold text-white font-syne">{card.title}</h3>
                         {isComingSoon && (
                           <span className="text-[10px] uppercase tracking-wider text-muted border border-border rounded px-1.5 py-0.5">
                             Soon
