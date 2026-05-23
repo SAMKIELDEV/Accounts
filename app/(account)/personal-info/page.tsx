@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@samkiel/authsdk/react';
-import { SamkielAuthError, UsernameChangeCooldownError } from '@samkiel/authsdk';
+import { SamkielAuthError, UsernameChangeCooldownError, tokenStorage } from '@samkiel/authsdk';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -16,11 +16,16 @@ import { formatDate } from '@/lib/datetime';
 import { AUTH_URL } from '@/lib/auth';
 import Link from 'next/link';
 
-// Simple cookie helper to read sk_access_token from browser
-function getCookie(name: string): string | null {
+// Get authorization token from SDK storage or cookie fallback
+function getAuthToken(): string | null {
+  // 1. Primary: SDK's tokenStorage (accesses localStorage / in-memory tokens in browser)
+  const localToken = tokenStorage.getAccessToken();
+  if (localToken) return localToken;
+
+  // 2. Fallback: document.cookie (useful for dev/non-httpOnly environments)
   if (typeof document === 'undefined') return null;
   const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
+  const parts = value.split(`; sk_access_token=`);
   if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
   return null;
 }
@@ -222,7 +227,7 @@ export default function PersonalInfoPage() {
   // Profile PATCH trigger
   const handleUpdateProfileField = async (fields: Record<string, any>, successMsg: string, setSaving: React.Dispatch<React.SetStateAction<boolean>>) => {
     setSaving(true);
-    const token = getCookie('sk_access_token');
+    const token = getAuthToken();
     try {
       const response = await fetch(`${AUTH_URL}/user/profile`, {
         method: 'PATCH',
@@ -230,6 +235,7 @@ export default function PersonalInfoPage() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify(fields),
       });
 
@@ -252,7 +258,7 @@ export default function PersonalInfoPage() {
   const handleUpdatePhone = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingPhone(true);
-    const token = getCookie('sk_access_token');
+    const token = getAuthToken();
     try {
       const response = await fetch(`${AUTH_URL}/user/phone`, {
         method: 'PATCH',
@@ -260,6 +266,7 @@ export default function PersonalInfoPage() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify({ phone }),
       });
 
