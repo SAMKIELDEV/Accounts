@@ -4,19 +4,14 @@ import { AuthProvider } from "@samkiel/authsdk/react";
 import { tokenStorage } from "@samkiel/authsdk";
 import { Toaster } from "sonner";
 
-// Helper to decode JWT exp and return seconds left
-function getExpiresInFromToken(token: string): number {
+// Helper to get payload from JWT token
+function getPayloadFromToken(token: string): any {
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) return 900;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    if (typeof payload.exp === 'number') {
-      const secondsLeft = payload.exp - Math.floor(Date.now() / 1000);
-      return Math.max(0, secondsLeft);
-    }
-    return 900;
+    if (parts.length !== 3) return null;
+    return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
-    return 900;
+    return null;
   }
 }
 
@@ -31,12 +26,24 @@ export function Providers({
 }) {
   // Sync server cookies to client localStorage synchronously during render
   if (typeof window !== 'undefined' && initialAccessToken && initialRefreshToken) {
-    const expiresIn = getExpiresInFromToken(initialAccessToken);
+    const payload = getPayloadFromToken(initialAccessToken);
+    const exp = payload?.exp;
+    const expiresIn = exp ? Math.max(0, exp - Math.floor(Date.now() / 1000)) : 900;
+
     tokenStorage.setTokens({
       accessToken: initialAccessToken,
       refreshToken: initialRefreshToken,
       expiresIn,
     });
+
+    if (payload?.userId) {
+      tokenStorage.setUser({
+        id: payload.userId,
+        email: payload.email,
+        name: payload.name,
+        role: payload.role,
+      });
+    }
   }
 
   return (
