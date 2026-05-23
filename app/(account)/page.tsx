@@ -172,8 +172,8 @@ export default function OverviewPage() {
           <Link href="/personal-info" className="block">
             <Card className="h-full hover:border-accent/40 hover:bg-surface/70 transition-all group flex flex-col justify-between">
               <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-full bg-accent text-black flex items-center justify-center font-bold font-syne text-lg uppercase shrink-0 select-none">
-                  {user?.name ? user.name[0] : (user?.email ? user.email[0] : 'U')}
+                <div className="h-11 w-11 rounded-xl bg-background border border-border flex items-center justify-center text-muted group-hover:text-accent group-hover:border-accent/30 transition-colors shrink-0">
+                  <User size={22} aria-hidden="true" />
                 </div>
                 <div className="space-y-1 min-w-0">
                   <h3 className="text-base font-semibold text-white font-syne">Personal Info</h3>
