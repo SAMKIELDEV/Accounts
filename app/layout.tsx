@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Figtree } from "next/font/google";
+import { cookies } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/Providers";
@@ -25,15 +26,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialAccessToken = cookieStore.get("sk_access_token")?.value;
+  const initialRefreshToken = cookieStore.get("sk_refresh_token")?.value;
+
   return (
     <html lang="en">
       <body className={`${syne.variable} ${figtree.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers 
+          initialAccessToken={initialAccessToken} 
+          initialRefreshToken={initialRefreshToken}
+        >
+          {children}
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>
