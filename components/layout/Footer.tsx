@@ -49,6 +49,7 @@ const productLinks = [
 const companyLinks = [
   { label: 'About', href: 'https://samkiel.tech/#about' },
   { label: 'Agency', href: 'https://samkiel.tech/#agency' },
+  { label: 'Careers', href: 'https://samkiel.tech/careers' },
   { label: 'Work', href: 'https://samkiel.tech/work' },
 ]
 
