@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SAMKIEL Accounts
+
+The official central account management portal for SAMKIEL services, built with Next.js 16, React 19, TailwindCSS v4, and `@samkiel/authsdk`.
+
+## Overview
+
+**SAMKIEL Accounts** (`accounts`) provides users with a unified dashboard to manage their personal profile, security credentials, active sessions, privacy preferences, and connected SAMKIEL ecosystem applications. Authentication and token lifecycle management are powered by `@samkiel/authsdk` and integrated with SAMKIEL ID (`id.samkiel.tech`).
+
+---
+
+## Features
+
+- **Centralized Authentication**:
+  - Sign in, registration, email verification, password recovery/reset, and OAuth support.
+- **Account Overview & Profile Management**:
+  - Update personal information (display name, email, avatar).
+  - Manage security settings, active sessions, and password credentials.
+  - View connected SAMKIEL products and service permissions.
+  - Privacy controls and account deletion options.
+- **Automated Token Lifecycle**:
+  - Edge/middleware-assisted silent access token refresh (`sk_access_token` and `sk_refresh_token`).
+  - Unified client-side auth state protection via `<AccountGuard>`.
+
+---
+
+## Tech Stack & Architecture
+
+- **Framework**: Next.js 16 (App Router)
+- **UI & Styling**: React 19, TailwindCSS v4, Framer Motion, Lucide Icons, Sonner (Toast notifications)
+- **Authentication**: `@samkiel/authsdk`, `jose` (JWT decoding/validation)
+- **Language**: TypeScript 5
+
+---
+
+## Project Structure
+
+```
+Accounts/
+├── app/
+│   ├── (account)/          # Protected account management routes
+│   │   ├── page.tsx        # Account Overview page
+│   │   ├── personal-info/  # Profile & personal details management
+│   │   ├── security/       # Security, password & session management
+│   │   ├── products/       # Connected SAMKIEL products
+│   │   ├── privacy/        # Privacy preferences
+│   │   └── delete-account/ # Account removal page
+│   ├── (auth)/             # Public authentication routes
+│   │   ├── login/          # Login page
+│   │   ├── register/       # Registration page
+│   │   ├── verify-email/   # Email verification page
+│   │   ├── forgot-password/# Password recovery request page
+│   │   └── reset-password/ # Password reset page
+│   ├── dashboard/          # Dashboard views
+│   ├── layout.tsx          # Root layout and theme providers
+│   └── globals.css         # Styling entry point
+├── components/
+│   ├── layout/             # TopBar, Navbar, Sidebar, Footer components
+│   ├── ui/                 # Reusable UI primitives
+│   ├── AccountGuard.tsx    # Auth route guard wrapper
+│   └── SessionRefresher.tsx# Opportunistic session refresher
+├── lib/
+│   ├── auth.ts             # Auth SDK configuration
+│   ├── datetime.ts         # Date and time formatting helpers
+│   └── nav.ts              # Navigation item definitions
+└── proxy.ts                # Next.js middleware for token handling
+```
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Node.js**: v18.x or later
+- **npm** (or preferred package manager)
+- SAMKIEL ID server endpoint (`https://id.samkiel.tech`)
+
+### Environment Variables
+
+Configure environment variables in a `.env` or `.env.local` file:
+
+```env
+NEXT_PUBLIC_AUTH_URL=https://id.samkiel.tech
+GOOGLE_CLIENT_ID=<your-google-client-id>
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation & Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Start development server
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run dev`: Start Next.js development server
+- `npm run build`: Build production application
+- `npm run start`: Start production server
+- `npm run lint`: Run ESLint checks
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private codebase — SAMKIEL. All rights reserved.
