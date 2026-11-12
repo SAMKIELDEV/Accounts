@@ -1,4 +1,4 @@
-# account.samkiel.tech — PRD & Technical Spec
+# accounts.samkiel.tech — PRD & Technical Spec
 **Document:** `SAMKIEL-Accounts-PRD.md`
 **Version:** 1.0 | April 2026
 **Author:** SAMKIEL (Ezekiel)
@@ -9,7 +9,7 @@
 
 ## 01 — Overview
 
-`account.samkiel.tech` is the user-facing account dashboard for the SAMKIEL platform. It gives users a single place to manage their identity, security, and product access across all SAMKIEL products — similar in spirit to Google's `myaccount.google.com`.
+`accounts.samkiel.tech` is the user-facing account dashboard for the SAMKIEL platform. It gives users a single place to manage their identity, security, and product access across all SAMKIEL products — similar in spirit to Google's `myaccount.google.com`.
 
 It is a **Next.js app** that talks exclusively to `id.samkiel.tech` via `@samkiel/authsdk`.
 
@@ -26,7 +26,7 @@ It is a **Next.js app** that talks exclusively to `id.samkiel.tech` via `@samkie
 | Icons | Lucide React |
 | Toasts | Sonner |
 | Animations | Framer Motion |
-| Hosting | Render (subdomain: `account.samkiel.tech`) |
+| Hosting | Render (subdomain: `accounts.samkiel.tech`) |
 
 ---
 
@@ -253,7 +253,7 @@ The sidebar is always visible on desktop. On mobile it collapses into a top navi
 
 **Phase 6 — Deploy**
 20. Deploy to Render
-21. Point `account.samkiel.tech` subdomain
+21. Point `accounts.samkiel.tech` subdomain
 
 ---
 
